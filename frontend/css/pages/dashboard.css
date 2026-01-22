@@ -1,0 +1,107 @@
+/* Dashboard Page Styles */
+.welcome-section {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+    color: var(--white);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.welcome-title {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-xs);
+}
+
+.welcome-subtitle {
+    opacity: 0.9;
+    font-size: var(--text-lg);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.quick-action-card {
+    text-align: center;
+    padding: var(--space-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+}
+
+.quick-action-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-md);
+    color: var(--primary-blue);
+}
+
+.quick-action-title {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xs);
+}
+
+.quick-action-desc {
+    color: var(--light-text);
+    font-size: var(--text-sm);
+}
+
+/* Recent Sessions */
+.recent-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Weekly Chart */
+.chart-container {
+    height: 250px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0;
+}
+
+.chart-bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--primary-blue), var(--success-green));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    position: relative;
+    transition: all var(--transition-base);
+    min-height: 40px;
+}
+
+.chart-bar:hover {
+    opacity: 0.8;
+    transform: translateY(-5px);
+}
+
+.chart-label {
+    text-align: center;
+    margin-top: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--light-text);
+}
+
+.chart-value {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--dark-text);
+}

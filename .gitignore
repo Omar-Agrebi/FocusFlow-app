@@ -1,0 +1,44 @@
+# Environment variables
+.env
+.env.*
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache / temp
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+
+# FastAPI / ASGI
+*.sqlite3
+
+# Node / frontend tooling (if used)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / output
+dist/
+build/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Tests / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Static collected files (optional)
+staticfiles/

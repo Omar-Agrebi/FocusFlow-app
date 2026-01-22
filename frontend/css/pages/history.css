@@ -1,0 +1,125 @@
+/* History Page Styles */
+.history-filters {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border-color);
+    background: var(--white);
+    color: var(--dark-text);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-weight: 500;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.filter-btn.active {
+    background: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-lg);
+}
+
+.history-table th {
+    background: var(--light-bg);
+    padding: var(--space-md);
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark-text);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.history-table td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-table tr:hover {
+    background: var(--light-bg);
+}
+
+.history-table .subject-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--primary-blue);
+    border-radius: 20px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.history-table .duration-cell {
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.history-table .quality-cell {
+    color: var(--warning-orange);
+}
+
+.history-table .completion-cell {
+    color: var(--success-green);
+}
+
+.table-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--light-text);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    color: var(--border-color);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-xl);
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    color: var(--dark-text);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.page-btn:hover {
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.page-btn.active {
+    background: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+}
