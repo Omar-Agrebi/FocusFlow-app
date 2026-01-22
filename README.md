@@ -22,3 +22,6 @@ FocusFlow is a comprehensive study tracking application designed to help users m
 *   **Core**: HTML5, CSS3, JavaScript (ES6+).
 *   **Architecture**: Vanilla JS with modular structure (`api.js`, `auth.js`, `components.js`).
 
+### Requirements
+*   **run**: pip install -r requirements.txt
+
