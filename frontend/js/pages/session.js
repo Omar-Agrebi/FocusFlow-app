@@ -1,4 +1,4 @@
-// Session page functionality
+// Session page functionality 
 const Session = {
     timer: {
         seconds: 0,
@@ -27,7 +27,6 @@ const Session = {
         // Initialize sliders
         Components.initSlider('duration', 'durationValue', ' min');
         Components.initSlider('completion', 'completionValue', '%');
-        Components.initSlider('focusLength', 'focusLengthValue', ' min');
         
         // Initialize star rating
         Components.initStarRating('qualityRating', 'quality');
@@ -53,24 +52,33 @@ const Session = {
             if (this.timer.running) return;
             
             this.timer.running = true;
-            startBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-flex';
-            stopBtn.style.display = 'inline-flex';
-            timerDisplay.classList.add('timer-running');
+            if (startBtn) startBtn.style.display = 'none';
+            if (pauseBtn) pauseBtn.style.display = 'inline-flex';
+            if (stopBtn) stopBtn.style.display = 'inline-flex';
+            if (timerDisplay) timerDisplay.classList.add('timer-running');
             
             this.timer.interval = setInterval(() => {
                 this.timer.seconds++;
                 updateDisplay();
                 
-                // Update duration slider
+                // Update duration slider based on timer
                 if (durationSlider) {
                     const minutes = Math.floor(this.timer.seconds / 60);
                     if (minutes <= parseInt(durationSlider.max)) {
                         durationSlider.value = minutes;
-                        document.getElementById('durationValue').textContent = `${minutes} min`;
+                        const valueDisplay = document.getElementById('durationValue');
+                        if (valueDisplay) valueDisplay.textContent = `${minutes} min`;
                     }
                 }
             }, 1000);
+            
+            // Update start time to now when timer starts
+            const startTimeInput = document.getElementById('startTime');
+            if (startTimeInput) {
+                const now = new Date();
+                const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+                startTimeInput.value = localTime.toISOString().slice(0, 16);
+            }
         };
         
         // Pause timer
@@ -79,19 +87,19 @@ const Session = {
             
             this.timer.running = false;
             clearInterval(this.timer.interval);
-            startBtn.style.display = 'inline-flex';
-            pauseBtn.style.display = 'none';
-            timerDisplay.classList.remove('timer-running');
+            if (startBtn) startBtn.style.display = 'inline-flex';
+            if (pauseBtn) pauseBtn.style.display = 'none';
+            if (timerDisplay) timerDisplay.classList.remove('timer-running');
         };
         
         // Stop timer
         this.stopTimer = () => {
             this.timer.running = false;
             clearInterval(this.timer.interval);
-            startBtn.style.display = 'inline-flex';
-            pauseBtn.style.display = 'none';
-            stopBtn.style.display = 'none';
-            timerDisplay.classList.remove('timer-running');
+            if (startBtn) startBtn.style.display = 'inline-flex';
+            if (pauseBtn) pauseBtn.style.display = 'none';
+            if (stopBtn) stopBtn.style.display = 'none';
+            if (timerDisplay) timerDisplay.classList.remove('timer-running');
             
             // Reset timer
             this.timer.seconds = 0;
@@ -104,9 +112,13 @@ const Session = {
     // Setup event listeners
     setupEventListeners() {
         // Timer buttons
-        document.getElementById('startTimerBtn').addEventListener('click', this.startTimer);
-        document.getElementById('pauseTimerBtn').addEventListener('click', this.pauseTimer);
-        document.getElementById('stopTimerBtn').addEventListener('click', this.stopTimer);
+        const startBtn = document.getElementById('startTimerBtn');
+        const pauseBtn = document.getElementById('pauseTimerBtn');
+        const stopBtn = document.getElementById('stopTimerBtn');
+        
+        if (startBtn) startBtn.addEventListener('click', this.startTimer);
+        if (pauseBtn) pauseBtn.addEventListener('click', this.pauseTimer);
+        if (stopBtn) stopBtn.addEventListener('click', this.stopTimer);
         
         // Form submission
         const form = document.getElementById('sessionForm');
@@ -126,54 +138,114 @@ const Session = {
         }
     },
     
-    // Save session
+    // Save session - TO REAL API
     async saveSession() {
         try {
-            const form = document.getElementById('sessionForm');
-            const formData = new FormData(form);
+            const userId = localStorage.getItem('userId') || 1;
             
-            const sessionData = {
-                subject: document.getElementById('subject').value,
-                startTime: document.getElementById('startTime').value,
-                duration: parseInt(document.getElementById('duration').value),
-                quality: parseInt(document.getElementById('quality').value),
-                completion: parseInt(document.getElementById('completion').value),
-                notes: document.getElementById('notes').value,
-                timerDuration: this.timer.seconds
-            };
+            // Get form values
+            const subject = document.getElementById('subject').value;
+            const startTime = document.getElementById('startTime').value;
+            const durationMinutes = parseInt(document.getElementById('duration').value);
+            const quality = parseInt(document.getElementById('quality').value) || null;
+            const completion = parseInt(document.getElementById('completion').value) || null;
+            const notes = document.getElementById('notes').value || '';
             
             // Validate
-            if (!sessionData.subject) {
+            if (!subject) {
                 Utils.showNotification('Please select a subject', 'error');
                 return;
             }
             
-            if (sessionData.quality === 0) {
-                Utils.showNotification('Please rate your session quality', 'error');
-                return;
+            // Calculate end time
+            const startDate = new Date(startTime);
+            const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+            
+            // Prepare session data for API
+            const sessionData = {
+                user_id: userId,
+                subject: subject,
+                start_time: startDate.toISOString(),
+                end_time: endDate.toISOString(),
+                duration_minutes: durationMinutes,
+                quality: quality,
+                percentage_completion: completion,
+                notes: notes
+            };
+            
+            // If timer was used, use timer duration
+            if (this.timer.seconds > 0) {
+                const timerMinutes = Math.floor(this.timer.seconds / 60);
+                if (timerMinutes > 0) {
+                    sessionData.duration_minutes = timerMinutes;
+                    const timerEndDate = new Date(startDate.getTime() + timerMinutes * 60000);
+                    sessionData.end_time = timerEndDate.toISOString();
+                }
             }
             
-            // Simulate API call
             Utils.showNotification('Saving session...', 'info');
-            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Save to localStorage for demo
-            const sessions = Utils.getFromStorage('sessions', []);
-            sessionData.id = sessions.length + 1;
-            sessionData.date = new Date().toISOString().split('T')[0];
-            sessions.push(sessionData);
-            Utils.saveToStorage('sessions', sessions);
+            // CALL REAL API
+            const savedSession = await API.createSession(sessionData);
             
+            // Show success
             Utils.showNotification('Session saved successfully!', 'success');
+            
+            // Reset form
             this.resetForm();
             
-            // Redirect to dashboard after 1 second
+            // Stop timer if running
+            if (this.timer.running) {
+                this.stopTimer();
+            }
+            
+            // Optionally redirect to dashboard or history
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1000);
+                // Update dashboard if we're still on the page
+                if (typeof Dashboard !== 'undefined' && Dashboard.loadData) {
+                    Dashboard.loadData();
+                }
+                
+                // Or navigate to dashboard
+                const dashboardLink = document.querySelector('.nav-link[data-page="dashboard"]');
+                if (dashboardLink) {
+                    dashboardLink.click();
+                }
+            }, 1500);
             
         } catch (error) {
             console.error('Error saving session:', error);
+            
+            // Fallback to localStorage if API fails
+            Utils.showNotification('API unavailable, saving locally...', 'warning');
+            await this.saveSessionToLocalStorage();
+        }
+    },
+    
+    // Fallback: Save to localStorage
+    async saveSessionToLocalStorage() {
+        try {
+            const sessions = Utils.getFromStorage('sessions', []);
+            
+            const sessionData = {
+                id: sessions.length + 1,
+                subject: document.getElementById('subject').value,
+                start_time: new Date().toISOString(),
+                duration_minutes: parseInt(document.getElementById('duration').value),
+                quality: parseInt(document.getElementById('quality').value) || null,
+                percentage_completion: parseInt(document.getElementById('completion').value) || null,
+                notes: document.getElementById('notes').value || '',
+                user_id: localStorage.getItem('userId') || 1
+            };
+            
+            sessions.push(sessionData);
+            Utils.saveToStorage('sessions', sessions);
+            
+            Utils.showNotification('Session saved locally (API unavailable)', 'success');
+            this.resetForm();
+            
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
             Utils.showNotification('Failed to save session', 'error');
         }
     },
@@ -184,23 +256,40 @@ const Session = {
         if (form) form.reset();
         
         // Reset timer
-        this.stopTimer();
+        if (this.timer.running) {
+            this.stopTimer();
+        }
         
-        // Reset sliders and star rating
+        // Reset form to defaults
         Components.initDateTimePicker('startTime');
-        document.getElementById('duration').value = 60;
-        document.getElementById('completion').value = 80;
-        document.getElementById('quality').value = 0;
-        document.getElementById('notes').value = '';
         
-        // Update displays
-        Components.initSlider('duration', 'durationValue', ' min');
-        Components.initSlider('completion', 'completionValue', '%');
+        const durationSlider = document.getElementById('duration');
+        const completionSlider = document.getElementById('completion');
         
-        // Reset stars
-        document.querySelectorAll('#qualityRating .star').forEach(star => {
-            star.classList.remove('active');
-        });
+        if (durationSlider) {
+            durationSlider.value = 60;
+            const durationValue = document.getElementById('durationValue');
+            if (durationValue) durationValue.textContent = '60 min';
+        }
+        
+        if (completionSlider) {
+            completionSlider.value = 80;
+            const completionValue = document.getElementById('completionValue');
+            if (completionValue) completionValue.textContent = '80%';
+        }
+        
+        // Reset quality stars
+        const qualityInput = document.getElementById('quality');
+        if (qualityInput) qualityInput.value = 0;
+        
+        const stars = document.querySelectorAll('#qualityRating .star');
+        if (stars) {
+            stars.forEach(star => star.classList.remove('active'));
+        }
+        
+        // Reset notes
+        const notes = document.getElementById('notes');
+        if (notes) notes.value = '';
         
         Utils.showNotification('Form reset', 'info');
     }

@@ -24,20 +24,71 @@ const Profile = {
         }
     },
     
-    // Load profile stats
+    // Load profile stats - FROM REAL DATA
     async loadProfileStats() {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
+        try {
+            const userId = localStorage.getItem('userId') || 1;
+            
+            // Get user profile
+            const userProfile = await API.getProfile({ user_id: userId });
+            
+            // Get user sessions for stats
+            const sessions = await API.getSessions({ user_id: userId });
+            
+            // Calculate stats from real data
+            const stats = this.calculateProfileStats(userProfile, sessions);
+            
+            // Update UI
+            this.updateStatsUI(stats);
+            
+        } catch (error) {
+            console.log('Using fallback stats:', error);
+            // Fallback to localStorage or default values
+            const user = Auth.getCurrentUser();
+            const stats = {
+                weeklyGoal: user.studyGoal || 20,
+                currentWeek: 0,
+                goalProgress: 0,
+                avgQuality: 0,
+                totalSessions: 0,
+                totalHours: 0
+            };
+            this.updateStatsUI(stats);
+        }
+    },
+    
+    // Calculate profile stats from real data
+    calculateProfileStats(userProfile, sessions) {
+        // This week's sessions
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
         
-        // Mock data
-        const stats = {
-            weeklyGoal: 20,
-            currentWeek: 15,
-            goalProgress: 75,
-            avgQuality: 4.2
+        const thisWeekSessions = sessions.filter(session => 
+            new Date(session.start_time) >= weekStart
+        );
+        
+        const totalMinutesThisWeek = thisWeekSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
+        const hoursThisWeek = totalMinutesThisWeek / 60;
+        const weeklyGoal = userProfile.studyGoal || 20;
+        
+        let avgQuality = 0;
+        if (sessions.length > 0) {
+            avgQuality = sessions.reduce((sum, s) => sum + (s.quality || 0), 0) / sessions.length;
+        }
+        
+        return {
+            weeklyGoal: weeklyGoal,
+            currentWeek: hoursThisWeek.toFixed(1),
+            goalProgress: weeklyGoal > 0 ? Math.min(100, Math.round((hoursThisWeek / weeklyGoal) * 100)) : 0,
+            avgQuality: avgQuality.toFixed(1),
+            totalSessions: sessions.length,
+            totalHours: (sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) / 60).toFixed(1)
         };
-        
-        // Update UI if elements exist
+    },
+    
+    // Update stats UI
+    updateStatsUI(stats) {
         const goalElements = document.querySelectorAll('.stat-card:nth-child(1) .stat-value');
         const weekElements = document.querySelectorAll('.stat-card:nth-child(2) .stat-value');
         const progressElements = document.querySelectorAll('.stat-card:nth-child(3) .stat-value');
@@ -46,30 +97,61 @@ const Profile = {
         goalElements.forEach(el => el.textContent = `${stats.weeklyGoal}h`);
         weekElements.forEach(el => el.textContent = `${stats.currentWeek}h`);
         progressElements.forEach(el => el.textContent = `${stats.goalProgress}%`);
-        qualityElements.forEach(el => el.textContent = stats.avgQuality.toFixed(1));
+        qualityElements.forEach(el => el.textContent = stats.avgQuality);
     },
     
-    // Load preferences
+    // Load preferences - FROM REAL API
     async loadPreferences() {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 200));
+        try {
+            const userId = localStorage.getItem('userId') || 1;
+            
+            // Get user profile (which should include preferences)
+            const userProfile = await API.getProfile({ user_id: userId });
+            
+            // Update form with real data
+            this.updateProfileForm(userProfile);
+            
+        } catch (error) {
+            console.log('Using fallback preferences:', error);
+            
+            // Fallback to localStorage or user data
+            const user = Auth.getCurrentUser();
+            
+            // Update form fields if they exist
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+            const profileClass = document.getElementById('profileClass');
+            const profileGoal = document.getElementById('profileGoal');
+            
+            if (profileName && user.name) profileName.value = user.name;
+            if (profileEmail && user.email) profileEmail.value = user.email;
+            if (profileClass && user.user_class) profileClass.value = user.user_class;
+            if (profileGoal && user.studyGoal) profileGoal.value = user.studyGoal;
+            
+            // Load preferences from localStorage as fallback
+            const preferences = Utils.getFromStorage('preferences', {
+                focusLength: 45,
+                breakReminders: 'enabled'
+            });
+            
+            // Update sliders
+            Components.initSlider('focusLength', 'focusLengthValue', ' min');
+            document.getElementById('focusLength').value = preferences.focusLength;
+            document.getElementById('breakReminders').value = preferences.breakReminders;
+        }
+    },
+    
+    // Update profile form with real data
+    updateProfileForm(userProfile) {
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileClass = document.getElementById('profileClass');
+        const profileGoal = document.getElementById('profileGoal');
         
-        // Get preferences from localStorage or use defaults
-        const preferences = Utils.getFromStorage('preferences', {
-            focusLength: 45,
-            breakReminders: 'enabled',
-            notifications: 'all',
-            theme: 'light'
-        });
-        
-        // Update form
-        document.getElementById('focusLength').value = preferences.focusLength;
-        document.getElementById('breakReminders').value = preferences.breakReminders;
-        document.getElementById('notifications').value = preferences.notifications;
-        document.getElementById('theme').value = preferences.theme;
-        
-        // Update slider display
-        Components.initSlider('focusLength', 'focusLengthValue', ' min');
+        if (profileName) profileName.value = userProfile.username || '';
+        if (profileEmail) profileEmail.value = userProfile.email || '';
+        if (profileClass) profileClass.value = userProfile.user_class || '';
+        if (profileGoal) profileGoal.value = userProfile.study_goal || 20;
     },
     
     // Setup event listeners
@@ -93,18 +175,21 @@ const Profile = {
         }
     },
     
-    // Save profile
+    // Save profile - TO REAL API
     async saveProfile() {
         try {
+            const userId = localStorage.getItem('userId') || 1;
+            
             const profileData = {
-                name: document.getElementById('profileName').value,
+                id: userId,
+                username: document.getElementById('profileName').value,
                 email: document.getElementById('profileEmail').value,
-                class: document.getElementById('profileClass').value,
-                studyGoal: parseInt(document.getElementById('profileGoal').value)
+                user_class: document.getElementById('profileClass').value,
+                study_goal: parseInt(document.getElementById('profileGoal').value)
             };
             
             // Validate
-            if (!profileData.name || !profileData.email) {
+            if (!profileData.username || !profileData.email) {
                 Utils.showNotification('Please fill in all required fields', 'error');
                 return;
             }
@@ -114,62 +199,41 @@ const Profile = {
                 return;
             }
             
-            if (profileData.studyGoal < 1 || profileData.studyGoal > 40) {
+            if (profileData.study_goal < 1 || profileData.study_goal > 40) {
                 Utils.showNotification('Study goal must be between 1 and 40 hours', 'error');
                 return;
             }
             
-            // Simulate API call
             Utils.showNotification('Updating profile...', 'info');
             
-            const result = await Auth.updateProfile(profileData);
-            
-            if (result.success) {
-                // Update display
+            // CALL REAL API
+            try {
+                await API.updateProfile(profileData);
+                
+                // Update local storage
+                const user = Auth.getCurrentUser();
+                user.name = profileData.username;
+                user.email = profileData.email;
+                user.user_class = profileData.user_class;
+                user.studyGoal = profileData.study_goal;
+                Utils.saveToStorage('user', user);
+                
+                // Update UI
                 Components.loadUserData();
                 Utils.showNotification('Profile updated successfully!', 'success');
-            } else {
-                Utils.showNotification(result.message, 'error');
+                
+            } catch (apiError) {
+                // If API fails, save to localStorage as fallback
+                console.log('API update failed, saving locally:', apiError);
+                const user = Auth.getCurrentUser();
+                Object.assign(user, profileData);
+                Utils.saveToStorage('user', user);
+                Utils.showNotification('Profile saved locally (API unavailable)', 'warning');
             }
             
         } catch (error) {
             console.error('Error saving profile:', error);
             Utils.showNotification('Failed to update profile', 'error');
-        }
-    },
-    
-    // Save preferences
-    async savePreferences() {
-        try {
-            const preferences = {
-                focusLength: parseInt(document.getElementById('focusLength').value),
-                breakReminders: document.getElementById('breakReminders').value,
-                notifications: document.getElementById('notifications').value,
-                theme: document.getElementById('theme').value
-            };
-            
-            // Save to localStorage
-            Utils.saveToStorage('preferences', preferences);
-            
-            // Apply theme if changed
-            if (preferences.theme === 'dark') {
-                document.body.classList.add('dark-theme');
-            } else if (preferences.theme === 'light') {
-                document.body.classList.remove('dark-theme');
-            } else {
-                // Auto theme based on system preference
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.body.classList.add('dark-theme');
-                } else {
-                    document.body.classList.remove('dark-theme');
-                }
-            }
-            
-            Utils.showNotification('Preferences saved successfully!', 'success');
-            
-        } catch (error) {
-            console.error('Error saving preferences:', error);
-            Utils.showNotification('Failed to save preferences', 'error');
         }
     }
 };
