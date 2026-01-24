@@ -18,9 +18,18 @@ def update_profile(profile: schemas.UserUpdate, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    for key, value in profile.dict(exclude_unset=True).items():
+    profile_data = profile.dict(exclude_unset=True)
+    if 'id' in profile_data:
+        del profile_data['id']
+        
+    for key, value in profile_data.items():
         setattr(user, key, value)
     
-    db.commit()
-    db.refresh(user)
+    try:
+        db.commit()
+        db.refresh(user)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+        
     return user

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - StudyFlow</title>
+    <title>Sign Up - StudyFlow</title>
 
     <!-- Shared CSS -->
     <link rel="stylesheet" href="css/shared/variables.css">
@@ -26,10 +26,15 @@
                 <h1 class="auth-logo">
                     <i class="fas fa-graduation-cap"></i> StudyFlow
                 </h1>
-                <p class="auth-subtitle">Track your study sessions and boost productivity</p>
+                <p class="auth-subtitle">Create your account and start tracking</p>
             </div>
 
-            <form id="loginForm" class="auth-form">
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
+                </div>
+
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
                     <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
@@ -37,33 +42,21 @@
 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter your password"
-                        required>
-                </div>
-
-                <div class="form-group form-check">
-                    <input type="checkbox" id="rememberMe" class="form-check-input">
-                    <label for="rememberMe" class="form-check-label">Remember me</label>
+                    <input type="password" id="password" class="form-control" placeholder="Create a password" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block btn-lg">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                    <i class="fas fa-user-plus"></i> Sign Up
                 </button>
 
                 <div class="auth-footer">
-                    <p>Don't have an account? <a href="register.html">Sign up</a></p>
-                    <p><a href="forgot-password.html">Forgot your password?</a></p>
+                    <p>Already have an account? <a href="login.html">Log in</a></p>
                 </div>
             </form>
-
-            <div class="auth-demo">
-                <p><strong>Demo Credentials:</strong></p>
-                <p>Email: demo@studyflow.com</p>
-                <p>Password: password</p>
-            </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="js/shared/utils.js"></script>
     <script src="js/shared/api.js"></script>
     <script src="js/shared/auth.js"></script>
@@ -77,14 +70,15 @@
             }
 
             // Form submission
-            document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            document.getElementById('registerForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
 
+                const name = document.getElementById('name').value;
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
 
                 // Simple validation
-                if (!email || !password) {
+                if (!name || !email || !password) {
                     Utils.showNotification('Please fill in all fields', 'error');
                     return;
                 }
@@ -97,31 +91,24 @@
                 // Show loading
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
                 submitBtn.disabled = true;
 
-                // Login
-                const result = await Auth.login(email, password);
+                // Register
+                const result = await Auth.register(name, email, password);
 
                 // Reset button
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
 
                 if (result.success) {
-                    Utils.showNotification('Login successful! Redirecting...', 'success');
+                    Utils.showNotification('Account created! Redirecting...', 'success');
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
-                    }, 1000);
+                    }, 1500);
                 } else {
-                    Utils.showNotification(result.message || 'Login failed', 'error');
+                    Utils.showNotification(result.message || 'Registration failed', 'error');
                 }
-            });
-
-            // Demo login button (optional)
-            document.querySelector('.auth-demo')?.addEventListener('click', function () {
-                document.getElementById('email').value = 'demo@studyflow.com';
-                document.getElementById('password').value = 'password';
-                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
             });
         });
     </script>

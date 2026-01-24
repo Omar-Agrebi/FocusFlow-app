@@ -16,8 +16,10 @@ const Auth = {
     async login(email, password) {
         try {
             const response = await API.login({ email, password });
-            Utils.saveToStorage('user', response.user);
-            Utils.saveToStorage('token', response.access_token);
+            // TODO: Backend doesn't generate token yet, use fake one for now
+            const token = response.access_token || 'fake-jwt-token-for-dev';
+            Utils.saveToStorage('user', response.user || { id: response.user_id, email });
+            Utils.saveToStorage('token', token);
             return { success: true, user: response.user };
         } catch (error) {
             console.error('Login failed:', error);
@@ -28,9 +30,11 @@ const Auth = {
     // Register function
     async register(name, email, password) {
         try {
-            const response = await API.register({ name, email, password });
-            Utils.saveToStorage('user', response.user);
-            Utils.saveToStorage('token', response.access_token);
+            const response = await API.register({ username: name, email, password });
+            // TODO: Backend doesn't generate token yet, use fake one for now
+            const token = response.access_token || 'fake-jwt-token-for-dev';
+            Utils.saveToStorage('user', response.user || { name: name, email });
+            Utils.saveToStorage('token', token);
             return { success: true, user: response.user };
         } catch (error) {
             console.error('Registration failed:', error);

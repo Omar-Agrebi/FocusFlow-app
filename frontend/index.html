@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyFlow - Track Your Study Sessions</title>
-    
+
     <!-- Shared CSS -->
     <link rel="stylesheet" href="css/shared/variables.css">
     <link rel="stylesheet" href="css/shared/layout.css">
     <link rel="stylesheet" href="css/shared/header.css">
     <link rel="stylesheet" href="css/shared/buttons.css">
-    
+
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="css/pages/login.css">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Redirect to dashboard if logged in -->
+    <script src="js/shared/utils.js"></script>
+    <script src="js/shared/api.js"></script>
     <script src="js/shared/auth.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Check if user is logged in
             if (Auth.isLoggedIn()) {
                 window.location.href = 'dashboard.html';
@@ -30,6 +33,7 @@
         });
     </script>
 </head>
+
 <body>
     <!-- Content will be redirected -->
     <div style="text-align: center; padding: 100px;">
@@ -37,4 +41,5 @@
         <p>Redirecting...</p>
     </div>
 </body>
+
 </html>

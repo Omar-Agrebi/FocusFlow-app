@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - StudyFlow</title>
-    
+
     <!-- Shared CSS -->
     <link rel="stylesheet" href="css/shared/variables.css">
     <link rel="stylesheet" href="css/shared/layout.css">
@@ -12,13 +13,14 @@
     <link rel="stylesheet" href="css/shared/buttons.css">
     <link rel="stylesheet" href="css/shared/forms.css">
     <link rel="stylesheet" href="css/shared/cards.css">
-    
+
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="css/pages/profile.css">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <!-- Header Navigation -->
     <header class="header">
@@ -27,28 +29,28 @@
                 <i class="fas fa-graduation-cap logo-icon"></i>
                 <span class="logo-text">StudyFlow</span>
             </a>
-            
+
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
             </button>
-            
+
             <nav>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="dashboard.html" class="nav-link">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a></li>
+                            <i class="fas fa-home"></i> Dashboard
+                        </a></li>
                     <li><a href="log-session.html" class="nav-link">
-                        <i class="fas fa-plus-circle"></i> Log Session
-                    </a></li>
+                            <i class="fas fa-plus-circle"></i> Log Session
+                        </a></li>
                     <li><a href="history.html" class="nav-link">
-                        <i class="fas fa-history"></i> History
-                    </a></li>
+                            <i class="fas fa-history"></i> History
+                        </a></li>
                     <li><a href="profile.html" class="nav-link active">
-                        <i class="fas fa-user"></i> Profile
-                    </a></li>
+                            <i class="fas fa-user"></i> Profile
+                        </a></li>
                 </ul>
             </nav>
-            
+
             <div class="user-info">
                 <div class="user-avatar" id="userAvatar">AS</div>
                 <span class="user-name" id="userName">Alex Smith</span>
@@ -104,10 +106,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="profileEmail" class="form-label">Email</label>
-                                <input type="email" id="profileEmail" class="form-control" value="alex.smith@email.com" required>
+                                <input type="email" id="profileEmail" class="form-control" value="alex.smith@email.com"
+                                    required>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="profileClass" class="form-label">Class/Grade</label>
@@ -115,10 +118,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="profileGoal" class="form-label">Study Goal (hours/week)</label>
-                                <input type="number" id="profileGoal" class="form-control" value="20" min="1" max="40" required>
+                                <input type="number" id="profileGoal" class="form-control" value="20" min="1" max="40"
+                                    required>
                             </div>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Save Profile
@@ -137,11 +141,12 @@
                             <div class="preference-item">
                                 <label for="focusLength" class="preference-label">Focus Time Length</label>
                                 <div class="slider-container">
-                                    <input type="range" id="focusLength" class="slider" min="15" max="120" value="45" step="5">
+                                    <input type="range" id="focusLength" class="slider" min="15" max="120" value="45"
+                                        step="5">
                                     <span class="slider-value" id="focusLengthValue">45 min</span>
                                 </div>
                             </div>
-                            
+
                             <div class="preference-item">
                                 <label for="breakReminders" class="preference-label">Break Reminders</label>
                                 <select id="breakReminders" class="form-control">
@@ -149,7 +154,7 @@
                                     <option value="disabled">Disabled</option>
                                 </select>
                             </div>
-                            
+
                             <div class="preference-item">
                                 <label for="notifications" class="preference-label">Notifications</label>
                                 <select id="notifications" class="form-control">
@@ -158,7 +163,7 @@
                                     <option value="none">None</option>
                                 </select>
                             </div>
-                            
+
                             <div class="preference-item">
                                 <label for="theme" class="preference-label">Theme</label>
                                 <select id="theme" class="form-control">
@@ -168,7 +173,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="form-actions" style="margin-top: var(--space-xl);">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Save Preferences
@@ -182,32 +187,34 @@
 
     <!-- JavaScript -->
     <script src="js/shared/utils.js"></script>
+    <script src="js/shared/api.js"></script>
     <script src="js/shared/auth.js"></script>
     <script src="js/shared/components.js"></script>
     <script src="js/pages/profile.js"></script>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Check authentication
             if (!Auth.isLoggedIn()) {
                 window.location.href = 'login.html';
                 return;
             }
-            
+
             // Initialize mobile menu
             Components.initMobileMenu();
-            
+
             // Initialize logout button
-            document.getElementById('logoutBtn').addEventListener('click', function() {
+            document.getElementById('logoutBtn').addEventListener('click', function () {
                 Auth.logout();
             });
-            
+
             // Load profile data
             Profile.loadData();
-            
+
             // Initialize profile page
             Profile.init();
         });
     </script>
 </body>
+
 </html>
