@@ -8,15 +8,43 @@ const Session = {
     
     // Initialize session page
     init() {
-        this.loadUserData();
+        this.loadUserData(); // Load user data FIRST
         this.initForm();
         this.initTimer();
         this.setupEventListeners();
     },
     
-    // Load user data
+    // Load user data IMMEDIATELY
     loadUserData() {
-        Components.loadUserData();
+        try {
+            const user = Auth.getCurrentUser();
+            
+            if (user) {
+                // Update user info in header immediately
+                this.updateUserHeader(user);
+            }
+            
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    },
+    
+    // Update user header immediately
+    updateUserHeader(user) {
+        // Update user avatar
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar && user.name) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            userAvatar.classList.remove('loading-placeholder');
+        }
+        
+        // Update user name
+        const userName = document.getElementById('userName');
+        if (userName && user.name) {
+            userName.textContent = user.name;
+            userName.classList.remove('loading-placeholder');
+        }
     },
     
     // Initialize form

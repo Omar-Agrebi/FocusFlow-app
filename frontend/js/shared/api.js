@@ -31,7 +31,7 @@ const API = {
     },
     
     // Sessions
-    getSessions(params) {
+    getSessions(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request(`/api/sessions?${query}`);
     },
@@ -54,6 +54,16 @@ const API = {
         return this.request(`/api/sessions/${id}`, {
             method: 'DELETE'
         });
+    },
+
+    // Get dashboard stats
+    async getDashboardStats() {
+        return this.request('/api/stats/dashboard');
+    },
+    
+    // Get weekly stats
+    async getWeeklyStats() {
+        return this.request('/api/stats/weekly');
     },
     
     // Auth

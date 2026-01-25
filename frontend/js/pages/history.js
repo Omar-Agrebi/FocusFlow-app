@@ -6,8 +6,42 @@ const History = {
     
     // Initialize history page
     init() {
+        this.loadUserData();
         this.setupEventListeners();
         this.loadSessions();
+    },
+
+    // Load user data
+    loadUserData() {
+        try {
+            const user = Auth.getCurrentUser();
+            
+            if (user) {
+                // Update user info in header
+                this.updateUserHeader(user);
+            }
+            
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    },
+
+    // Update user header
+    updateUserHeader(user) {
+        // Update user avatar
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar && user.name) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            userAvatar.classList.remove('loading-placeholder');
+        }
+        
+        // Update user name
+        const userName = document.getElementById('userName');
+        if (userName && user.name) {
+            userName.textContent = user.name;
+            userName.classList.remove('loading-placeholder');
+        }
     },
     
     // Setup event listeners
@@ -94,38 +128,80 @@ const History = {
     // Update stats
     updateStats(sessions) {
         if (sessions.length === 0) {
-            document.getElementById('historyTotalTime').textContent = '0h';
-            document.getElementById('historyTotalSessions').textContent = '0';
+            const totalTimeElement = document.getElementById('historyTotalTime');
+            const totalSessionsElement = document.getElementById('historyTotalSessions');
+            const avgDurationElement = document.getElementById('historyAvgDuration');
+            const avgQualityElement = document.getElementById('historyAvgQuality');
+            
+            if (totalTimeElement) {
+                totalTimeElement.textContent = '0h';
+                totalTimeElement.classList.remove('loading-placeholder');
+            }
+            if (totalSessionsElement) {
+                totalSessionsElement.textContent = '0';
+                totalSessionsElement.classList.remove('loading-placeholder');
+            }
+            if (avgDurationElement) {
+                avgDurationElement.textContent = '0m';
+                avgDurationElement.classList.remove('loading-placeholder');
+            }
+            if (avgQualityElement) {
+                avgQualityElement.textContent = '0.0';
+                avgQualityElement.classList.remove('loading-placeholder');
+            }
             return;
         }
         
-        const totalMinutes = sessions.reduce((sum, session) => sum + (session.duration_minutes || 0), 0);
+        const totalMinutes = sessions.reduce((sum, session) => sum + (session.duration || session.duration_minutes || 0), 0);
+        const avgDuration = Math.round(totalMinutes / sessions.length);
+        const avgQuality = sessions.length > 0 
+            ? (sessions.reduce((sum, session) => sum + (session.quality || 0), 0) / sessions.length).toFixed(1)
+            : 0;
         
-        document.getElementById('historyTotalTime').textContent = Utils.formatDuration(totalMinutes);
-        document.getElementById('historyTotalSessions').textContent = sessions.length;
+        const totalTimeElement = document.getElementById('historyTotalTime');
+        const totalSessionsElement = document.getElementById('historyTotalSessions');
+        const avgDurationElement = document.getElementById('historyAvgDuration');
+        const avgQualityElement = document.getElementById('historyAvgQuality');
+        
+        if (totalTimeElement) {
+            totalTimeElement.textContent = Utils.formatDuration(totalMinutes);
+            totalTimeElement.classList.remove('loading-placeholder');
+        }
+        if (totalSessionsElement) {
+            totalSessionsElement.textContent = sessions.length;
+            totalSessionsElement.classList.remove('loading-placeholder');
+        }
+        if (avgDurationElement) {
+            avgDurationElement.textContent = Utils.formatDuration(avgDuration);
+            avgDurationElement.classList.remove('loading-placeholder');
+        }
+        if (avgQualityElement) {
+            avgQualityElement.textContent = avgQuality;
+            avgQualityElement.classList.remove('loading-placeholder');
+        }
     },
     
     // Render sessions table
     renderSessions(sessions) {
         const tableBody = document.getElementById('historyTableBody');
-        
-        if (sessions.length === 0) {
+
+        if (!sessions || sessions.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">No sessions found</td></tr>';
             return;
         }
-        
+
         // Calculate pagination
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
         const paginatedSessions = sessions.slice(startIndex, endIndex);
-        
+
         tableBody.innerHTML = paginatedSessions.map(session => `
             <tr>
-                <td>${Utils.formatDate(session.start_time)}</td>
-                <td>${session.subject}</td>
-                <td>${Utils.formatDuration(session.duration_minutes)}</td>
+                <td>${Utils.formatDate(session.start_time || session.created_at)}</td>
+                <td>${session.subject || 'No Subject'}</td>
+                <td>${Utils.formatDuration(session.duration || session.duration_minutes || 0)}</td>
                 <td>${session.quality ? Utils.generateStarRating(session.quality) : 'N/A'}</td>
-                <td>${session.percentage_completion || 0}%</td>
+                <td>${session.completion || session.percentage_completion || 0}%</td>
                 <td>
                     <div class="table-actions">
                         <button class="btn btn-icon btn-sm" title="Edit" onclick="History.editSession(${session.id})">
@@ -139,6 +215,7 @@ const History = {
             </tr>
         `).join('');
     },
+
     
     // Render pagination
     renderPagination(totalItems) {

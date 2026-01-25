@@ -105,3 +105,52 @@
     font-weight: 600;
     color: var(--dark-text);
 }
+
+.loading-indicator {
+    text-align: center;
+    padding: var(--space-lg);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+    border: 2px dashed var(--primary-blue);
+    color: var(--primary-blue);
+    font-weight: 500;
+}
+
+.loading-indicator i {
+    margin-right: var(--space-sm);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--light-text);
+}
+
+.empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    color: var(--border-color);
+}
+
+.empty-state h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--dark-text);
+}
+
+.empty-state p {
+    margin-bottom: var(--space-md);
+}
+
+/* Session status classes */
+.session-card.completed {
+    border-left-color: var(--success-green);
+}
+
+.session-card.in-progress {
+    border-left-color: var(--warning-orange);
+}
+
+.session-card.not-started {
+    border-left-color: var(--light-text);
+}

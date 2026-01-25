@@ -2,175 +2,300 @@
 const Dashboard = {
     // Initialize dashboard
     init() {
-        this.loadData();
+        this.loadUserData(); // Load user data FIRST
         this.setupEventListeners();
+        this.loadDashboardData(); // Then load other data
     },
     
-    // Load dashboard data
-    async loadData() {
+    // Setup event listeners
+    setupEventListeners() {
+        // Quick action cards
+        document.querySelectorAll('.quick-action-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const url = card.getAttribute('data-url') || 
+                           card.onclick?.toString().match(/href='([^']+)'/)?.[1];
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
+        
+        // Refresh button (optional)
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.loadDashboardData();
+            });
+        }
+    },
+    
+    // Load user data IMMEDIATELY (no async)
+    loadUserData() {
         try {
-            // Load user data
-            Components.loadUserData();
+            const user = Auth.getCurrentUser();
             
-            // Load dashboard stats
-            await this.loadStats();
+            if (user && user.name) {
+                // Update welcome message immediately
+                const welcomeName = document.getElementById('welcomeName');
+                if (welcomeName) {
+                    const firstName = user.name.split(' ')[0];
+                    welcomeName.textContent = firstName;
+                    welcomeName.classList.remove('loading-placeholder');
+                }
+                
+                // Update user info in header immediately
+                this.updateUserHeader(user);
+            }
             
-            // Load recent sessions
-            await this.loadRecentSessions();
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    },
+    
+    // Update user header immediately
+    updateUserHeader(user) {
+        // Update user avatar
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar && user.name) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            userAvatar.classList.remove('loading-placeholder');
+        }
+        
+        // Update user name
+        const userName = document.getElementById('userName');
+        if (userName && user.name) {
+            userName.textContent = user.name;
+            userName.classList.remove('loading-placeholder');
+        }
+    },
+    
+    // Load other dashboard data (stats, sessions, chart)
+    async loadDashboardData() {
+        try {
+            // Show loading state for dynamic data
+            this.showLoading(true);
             
-            // Load weekly chart
-            await this.loadWeeklyChart();
+            // Load data in parallel
+            await Promise.all([
+                this.loadDashboardStats(),
+                this.loadRecentSessions(),
+                this.loadWeeklyChartData()
+            ]);
+            
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             Utils.showNotification('Failed to load dashboard data', 'error');
+        } finally {
+            this.showLoading(false);
         }
     },
     
-    // Load dashboard stats - FROM REAL API
-    async loadStats() {
+    // Load dashboard stats from API
+    async loadDashboardStats() {
         try {
-            // TRY REAL API FIRST
-            const userId = localStorage.getItem('userId') || 1;
+            // REAL API CALL
+            const stats = await API.getDashboardStats();
             
-            // Get stats from your backend
-            const stats = await API.getDashboardStats({ user_id: userId });
-            
-            // Update UI with real data
-            document.getElementById('totalTime').textContent = Utils.formatDuration(stats.total_time || 0);
-            document.getElementById('sessionsCount').textContent = stats.sessions_count || 0;
-            document.getElementById('focusScore').textContent = `${stats.avg_quality || 0}/5`;
-            document.getElementById('goalProgress').textContent = `${stats.total_completion || 0}%`;
+            // Update stats in UI
+            this.updateStatsUI(stats);
             
         } catch (error) {
-            console.log('Using fallback stats calculation:', error);
-            
-            // FALLBACK: Calculate stats from sessions
-            const userId = localStorage.getItem('userId') || 1;
-            const sessions = await API.getSessions({ user_id: userId });
-            
-            if (sessions.length > 0) {
-                const totalMinutes = sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
-                const avgQuality = sessions.reduce((sum, s) => sum + (s.quality || 0), 0) / sessions.length;
-                const avgCompletion = sessions.reduce((sum, s) => sum + (s.percentage_completion || 0), 0) / sessions.length;
-                
-                document.getElementById('totalTime').textContent = Utils.formatDuration(totalMinutes);
-                document.getElementById('sessionsCount').textContent = sessions.length;
-                document.getElementById('focusScore').textContent = `${avgQuality.toFixed(1)}/5`;
-                document.getElementById('goalProgress').textContent = `${avgCompletion.toFixed(0)}%`;
-            } else {
-                // No sessions yet
-                document.getElementById('totalTime').textContent = '0h';
-                document.getElementById('sessionsCount').textContent = '0';
-                document.getElementById('focusScore').textContent = '0/5';
-                document.getElementById('goalProgress').textContent = '0%';
-            }
+            console.error('Error loading dashboard stats:', error);
+            // Show placeholder data
+            this.showPlaceholderStats();
         }
     },
     
-    // Load recent sessions - FROM REAL API
+    // Update stats UI
+    updateStatsUI(stats) {
+        // Total Time Today
+        const totalTimeElement = document.getElementById('totalTime');
+        if (totalTimeElement && stats.total_time_today) {
+            totalTimeElement.textContent = this.formatDuration(stats.total_time_today);
+        }
+        
+        // Sessions Count Today
+        const sessionsCountElement = document.getElementById('sessionsCount');
+        if (sessionsCountElement && stats.sessions_today !== undefined) {
+            sessionsCountElement.textContent = stats.sessions_today;
+        }
+        
+        // Focus Score
+        const focusScoreElement = document.getElementById('focusScore');
+        if (focusScoreElement && stats.avg_focus_score !== undefined) {
+            focusScoreElement.textContent = `${stats.avg_focus_score.toFixed(1)}/10`;
+        }
+        
+        // Weekly Goal Progress
+        const goalProgressElement = document.getElementById('goalProgress');
+        if (goalProgressElement && stats.weekly_goal_progress !== undefined) {
+            goalProgressElement.textContent = `${stats.weekly_goal_progress}%`;
+        }
+    },
+    
+    // Show placeholder stats if API fails
+    showPlaceholderStats() {
+        const stats = {
+            total_time_today: 0,
+            sessions_today: 0,
+            avg_focus_score: 0,
+            weekly_goal_progress: 0
+        };
+        
+        this.updateStatsUI(stats);
+    },
+    
+    // Load recent sessions from API
     async loadRecentSessions() {
         try {
-            const userId = localStorage.getItem('userId') || 1;
-            const sessions = await API.getSessions({ user_id: userId });
+            //  REAL API CALL - Get recent sessions
+            const sessions = await API.getSessions({ 
+                limit: 5,
+                order_by: 'start_time',
+                order_dir: 'desc'
+            });
             
-            // Get most recent 3 sessions
-            const recentSessions = sessions
-                .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))
-                .slice(0, 3);
+            // Update recent sessions UI
+            this.updateRecentSessionsUI(sessions);
             
-            // Update UI
-            const container = document.getElementById('recentSessions');
-            if (container) {
-                if (recentSessions.length === 0) {
-                    container.innerHTML = '<div class="empty-state">No sessions yet. Start your first study session!</div>';
-                    return;
-                }
-                
-                container.innerHTML = recentSessions.map(session => `
-                    <div class="session-card">
-                        <div class="session-header">
-                            <div class="session-title">${session.subject}</div>
-                            <div class="session-duration">${Utils.formatDuration(session.duration_minutes)}</div>
-                        </div>
-                        <div class="session-meta">
-                            <span class="session-time">
-                                <i class="fas fa-clock"></i> ${Utils.formatDateTime(session.start_time)}
-                            </span>
-                            <span class="session-quality">
-                                ${Utils.generateStarRating(session.quality || 0)}
-                            </span>
-                        </div>
-                        ${session.notes ? `<div class="session-notes">${session.notes}</div>` : ''}
-                    </div>
-                `).join('');
-            }
         } catch (error) {
             console.error('Error loading recent sessions:', error);
-            const container = document.getElementById('recentSessions');
-            if (container) {
-                container.innerHTML = '<div class="error-state">Failed to load sessions</div>';
-            }
+            this.showEmptyRecentSessions();
         }
     },
     
-    // Load weekly chart - FROM REAL DATA
-    async loadWeeklyChart() {
+    // Update recent sessions UI
+    updateRecentSessionsUI(sessions) {
+        const container = document.getElementById('recentSessions');
+        if (!container) return;
+        
+        if (!sessions || sessions.length === 0) {
+            this.showEmptyRecentSessions();
+            return;
+        }
+        
+        container.innerHTML = sessions.map(session => `
+            <div class="session-card ${this.getSessionStatusClass(session)}">
+                <div class="session-header">
+                    <div class="session-title">${session.subject || 'No Subject'}</div>
+                    <div class="session-duration">${this.formatDuration(session.duration)}</div>
+                </div>
+                <div class="session-meta">
+                    <span class="session-time">
+                        <i class="fas fa-clock"></i> 
+                        ${Utils.formatDateTime(session.start_time)}
+                    </span>
+                    <span class="session-quality">
+                        <i class="fas fa-star"></i> 
+                        ${session.quality || 0}/5
+                    </span>
+                </div>
+                ${session.notes ? `
+                    <div class="session-notes">
+                        <i class="fas fa-sticky-note"></i> ${session.notes}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    },
+    
+    // Show empty state for recent sessions
+    showEmptyRecentSessions() {
+        const container = document.getElementById('recentSessions');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-book-open empty-icon"></i>
+                <h3>No Recent Sessions</h3>
+                <p>Start your first study session to see it here!</p>
+                <a href="log-session.html" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Start First Session
+                </a>
+            </div>
+        `;
+    },
+    
+    // Load weekly chart data from API
+    async loadWeeklyChartData() {
         try {
-            const userId = localStorage.getItem('userId') || 1;
-            const sessions = await API.getSessions({ user_id: userId });
+            //  REAL API CALL - Get weekly stats
+            const weeklyData = await this.getWeeklyStudyData();
             
-            if (sessions.length === 0) {
-                this.renderEmptyChart();
-                return;
-            }
-            
-            // Group sessions by day of the week
-            const weekData = this.calculateWeeklyData(sessions);
-            
-            // Update UI
-            this.renderWeeklyChart(weekData);
+            // Update chart UI
+            this.updateWeeklyChartUI(weeklyData);
             
         } catch (error) {
-            console.error('Error loading weekly chart:', error);
-            this.renderEmptyChart();
+            console.error('Error loading weekly chart data:', error);
+            this.showEmptyChart();
+        }
+    },
+    
+    // Get weekly study data from API
+    async getWeeklyStudyData() {
+        try {
+            // You might need to create a specific endpoint for weekly data
+            // For now, we'll calculate from sessions
+            const sessions = await API.getSessions({ 
+                limit: 100,
+                order_by: 'start_time',
+                order_dir: 'desc'
+            });
+            
+            return this.calculateWeeklyData(sessions);
+            
+        } catch (error) {
+            console.error('Error getting weekly data:', error);
+            return this.getDefaultWeeklyData();
         }
     },
     
     // Calculate weekly data from sessions
     calculateWeeklyData(sessions) {
+        // Get last 7 days
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        const weekData = days.map(day => ({ day, hours: 0 }));
+        const weeklyData = days.map(day => ({ day, hours: 0 }));
         
+        if (!sessions || sessions.length === 0) {
+            return weeklyData;
+        }
+        
+        // Calculate hours for each day
         sessions.forEach(session => {
-            const date = new Date(session.start_time);
-            const dayIndex = date.getDay(); // 0 = Sunday
-            const dayName = days[dayIndex === 0 ? 6 : dayIndex - 1]; // Adjust to start with Monday
+            const sessionDate = new Date(session.start_time);
+            const dayIndex = (sessionDate.getDay() + 6) % 7; // Monday = 0
             
-            const data = weekData.find(d => d.day === dayName);
-            if (data) {
-                data.hours += session.duration_minutes / 60;
+            if (dayIndex >= 0 && dayIndex < 7) {
+                weeklyData[dayIndex].hours += (session.duration || 0) / 60;
             }
         });
         
-        return weekData;
+        return weeklyData;
     },
     
-    // Render weekly chart
-    renderWeeklyChart(weekData) {
+    // Get default weekly data (fallback)
+    getDefaultWeeklyData() {
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        return days.map(day => ({ day, hours: 0 }));
+    },
+    
+    // Update weekly chart UI
+    updateWeeklyChartUI(weeklyData) {
         const container = document.getElementById('weeklyChart');
         if (!container) return;
         
         // Find max for scaling
-        const maxHours = Math.max(...weekData.map(d => d.hours), 1); // Minimum 1 hour for scaling
+        const maxHours = Math.max(...weeklyData.map(d => d.hours), 1); // At least 1 to avoid division by zero
         
-        container.innerHTML = weekData.map(data => {
+        container.innerHTML = weeklyData.map(data => {
             const height = (data.hours / maxHours) * 100;
-            const hoursText = data.hours > 0 ? `${data.hours.toFixed(1)}h` : '';
+            const hoursDisplay = data.hours > 0 ? data.hours.toFixed(1) : '0';
             
             return `
                 <div class="chart-column">
                     <div class="chart-bar" style="height: ${height}%">
-                        ${hoursText ? `<div class="chart-value">${hoursText}</div>` : ''}
+                        <div class="chart-value">${hoursDisplay}h</div>
                     </div>
                     <div class="chart-label">${data.day}</div>
                 </div>
@@ -178,8 +303,8 @@ const Dashboard = {
         }).join('');
     },
     
-    // Render empty chart
-    renderEmptyChart() {
+    // Show empty chart
+    showEmptyChart() {
         const container = document.getElementById('weeklyChart');
         if (!container) return;
         
@@ -187,25 +312,55 @@ const Dashboard = {
         
         container.innerHTML = days.map(day => `
             <div class="chart-column">
-                <div class="chart-bar" style="height: 10%"></div>
+                <div class="chart-bar" style="height: 0%">
+                    <div class="chart-value">0h</div>
+                </div>
                 <div class="chart-label">${day}</div>
             </div>
         `).join('');
     },
     
-    // Setup event listeners
-    setupEventListeners() {
-        // Quick action buttons
-        const startSessionBtn = document.getElementById('startSessionBtn');
-        if (startSessionBtn) {
-            startSessionBtn.addEventListener('click', () => {
-                // Navigate to log session page
-                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-                
-                document.querySelector('.nav-link[data-page="log-session"]').classList.add('active');
-                document.getElementById('log-session').classList.add('active');
-            });
+    // Format duration (helper function)
+    formatDuration(minutes) {
+        return Utils.formatDuration(minutes);
+    },
+    
+    // Get session status class
+    getSessionStatusClass(session) {
+        if (session.completion >= 90) return 'completed';
+        if (session.completion >= 50) return 'in-progress';
+        return 'not-started';
+    },
+    
+    // Show/hide loading state
+    showLoading(isLoading) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        if (isLoading) {
+            // Create loading indicator if it doesn't exist
+            if (!loadingIndicator) {
+                const indicator = document.createElement('div');
+                indicator.id = 'loadingIndicator';
+                indicator.className = 'loading-indicator';
+                indicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading dashboard...';
+                document.querySelector('.container').prepend(indicator);
+            }
+        } else {
+            // Remove loading indicator
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+    },
+    
+    // Check for first login (after registration)
+    checkFirstLogin() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('firstLogin') === 'true') {
+            Utils.showNotification('Welcome to StudyFlow! Start tracking your study sessions.', 'success');
+            
+            // Clear the parameter from URL
+            window.history.replaceState({}, '', window.location.pathname);
         }
     }
 };

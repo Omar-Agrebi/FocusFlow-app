@@ -36,7 +36,7 @@
                     <li><a href="dashboard.html" class="nav-link">
                         <i class="fas fa-home"></i> Dashboard
                     </a></li>
-                    <li><a href="log-session.html" class="nav-link">
+                    <li><a href="session.html" class="nav-link">
                         <i class="fas fa-plus-circle"></i> Log Session
                     </a></li>
                     <li><a href="history.html" class="nav-link active">
@@ -49,8 +49,8 @@
             </nav>
             
             <div class="user-info">
-                <div class="user-avatar" id="userAvatar">AS</div>
-                <span class="user-name" id="userName">Alex Smith</span>
+                <div class="user-avatar loading-placeholder" id="userAvatar">U</div>
+                <span class="user-name loading-placeholder" id="userName">Loading...</span>
                 <button class="logout-btn" id="logoutBtn" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -66,19 +66,19 @@
             <!-- Stats -->
             <div class="stats-grid" style="margin-bottom: var(--space-xl);">
                 <div class="stat-card card">
-                    <div class="stat-value" id="historyTotalTime">28h 45m</div>
+                    <div class="stat-value" id="historyTotalTime">00h 00m</div>
                     <div class="stat-label">Total Study Time</div>
                 </div>
                 <div class="stat-card card">
-                    <div class="stat-value" id="historyTotalSessions">34</div>
+                    <div class="stat-value" id="historyTotalSessions">,</div>
                     <div class="stat-label">Total Sessions</div>
                 </div>
                 <div class="stat-card card">
-                    <div class="stat-value" id="historyAvgDuration">51m</div>
+                    <div class="stat-value" id="historyAvgDuration">00m</div>
                     <div class="stat-label">Avg. Duration</div>
                 </div>
                 <div class="stat-card card">
-                    <div class="stat-value" id="historyAvgQuality">4.2</div>
+                    <div class="stat-value" id="historyAvgQuality">?</div>
                     <div class="stat-label">Avg. Quality</div>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                     </div>
                     <h3>No Study Sessions Found</h3>
                     <p>Start your first study session to see it here!</p>
-                    <a href="log-session.html" class="btn btn-primary" style="margin-top: var(--space-md);">
+                    <a href="session.html" class="btn btn-primary" style="margin-top: var(--space-md);">
                         <i class="fas fa-plus"></i> Log First Session
                     </a>
                 </div>

@@ -2,16 +2,77 @@
 const Profile = {
     // Initialize profile page
     init() {
-        this.loadData();
+        this.loadUserData(); // Load user data FIRST
         this.setupEventListeners();
+        this.loadProfileData(); // Then load other data
     },
     
-    // Load profile data
-    async loadData() {
+    // Load user data IMMEDIATELY
+    loadUserData() {
         try {
-            // Load user data
-            Components.loadUserData();
+            const user = Auth.getCurrentUser();
             
+            if (user) {
+                // Update profile header immediately
+                this.updateProfileHeader(user);
+                
+                // Update form fields immediately
+                this.updateFormFields(user);
+            }
+            
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    },
+    
+    // Update profile header immediately
+    updateProfileHeader(user) {
+        // Update profile name display
+        const profileNameDisplay = document.getElementById('profileNameDisplay');
+        if (profileNameDisplay && user.name) {
+            profileNameDisplay.textContent = user.name;
+            profileNameDisplay.classList.remove('loading-placeholder');
+        }
+        
+        // Update profile class display
+        const profileClassDisplay = document.getElementById('profileClassDisplay');
+        if (profileClassDisplay && user.class) {
+            profileClassDisplay.textContent = user.class;
+            profileClassDisplay.classList.remove('loading-placeholder');
+        }
+        
+        // Update profile email display
+        const profileEmailDisplay = document.getElementById('profileEmailDisplay');
+        if (profileEmailDisplay && user.email) {
+            profileEmailDisplay.textContent = user.email;
+            profileEmailDisplay.classList.remove('loading-placeholder');
+        }
+        
+        // Update profile avatar
+        const profileAvatar = document.getElementById('profileAvatar');
+        if (profileAvatar && user.name) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            profileAvatar.textContent = initials;
+            profileAvatar.classList.remove('loading-placeholder');
+        }
+    },
+    
+    // Update form fields immediately
+    updateFormFields(user) {
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileClass = document.getElementById('profileClass');
+        const profileGoal = document.getElementById('profileGoal');
+        
+        if (profileName && user.name) profileName.value = user.name;
+        if (profileEmail && user.email) profileEmail.value = user.email;
+        if (profileClass && user.class) profileClass.value = user.class;
+        if (profileGoal && user.studyGoal) profileGoal.value = user.studyGoal;
+    },
+    
+    // Rename your existing loadData() to loadProfileData()
+    async loadProfileData() {
+        try {
             // Load profile stats
             await this.loadProfileStats();
             
