@@ -1,4 +1,5 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pathlib import Path
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -7,6 +8,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     class Config:
-        env_file = ".env"
+        # Go one directory up to find .env
+        env_file = str(Path(__file__).parent.parent / ".env")
 
 settings = Settings()
