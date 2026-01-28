@@ -46,7 +46,17 @@ document.addEventListener('DOMContentLoaded', () => {
         form.classList.add('loading');
 
         try {
-            const result = await Auth.login(email, password);
+            const result = await Auth.login({ email, password });
+
+            // Map backend response to expected frontend format
+            if (result.access_token) {
+                result.success = true;
+                result.user = result.user;
+                result.message = 'Login successful';
+            } else {
+                result.success = false;
+            }
+
 
             if (result.success) {
                 // Save email if "Remember me" is checked

@@ -13,7 +13,7 @@ const Auth = {
     },
 
     // Login function
-    async login(email, password) {
+    async login({ email, password }) {
         try {
             const response = await API.login({ email, password });
             Utils.saveToStorage('user', response.user);
@@ -26,9 +26,9 @@ const Auth = {
     },
 
     // Register function
-    async register(name, email, password) {
+    async register({ username, email, password, gender, age, user_class }) {
         try {
-            const response = await API.register({ name, email, password });
+            const response = await API.register({ username, email, password, gender, age, user_class });
             Utils.saveToStorage('user', response.user);
             Utils.saveToStorage('token', response.access_token);
             return { success: true, user: response.user };

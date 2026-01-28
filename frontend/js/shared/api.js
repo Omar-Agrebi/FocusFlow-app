@@ -55,11 +55,6 @@ const API = {
             method: 'DELETE'
         });
     },
-
-    // Get dashboard stats
-    async getDashboardStats() {
-        return this.request('/api/stats/dashboard');
-    },
     
     // Get weekly stats
     async getWeeklyStats() {

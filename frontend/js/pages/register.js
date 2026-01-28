@@ -226,13 +226,13 @@ const Register = {
         const classGrade = document.getElementById('classGrade').value;
         const studyGoal = parseInt(document.getElementById('studyGoal').value);
         
-        // Prepare user data for API
         const userData = {
-            name: `${firstName} ${lastName}`,
+            username: `${firstName} ${lastName}`,
             email: email,
             password: password,
-            class: classGrade,
-            study_goal: studyGoal
+            user_class: classGrade,
+            gender: null,
+            age: null
         };
         
         try {
@@ -241,14 +241,8 @@ const Register = {
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
             submitBtn.disabled = true;
-            
-            // Use Auth.register() which calls API.register()
-            const result = await Auth.register(
-                userData.name,
-                userData.email,
-                userData.password
-                // Note: class and study_goal need to be added to your API call
-            );
+
+            const result = await Auth.register(userData);
             
             // Reset button
             submitBtn.innerHTML = originalText;
