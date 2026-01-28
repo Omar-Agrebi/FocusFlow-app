@@ -1,22 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
-    email: str
-    password: str
+    email: EmailStr
+    password: str = Field(min_length=8)
     gender: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=0)
     user_class: Optional[str] = None
 
 class SessionCreate(BaseModel):
     user_id: int
+    subject: str  
     start_time: datetime
     end_time: datetime
-    duration_minutes: int
     quality: Optional[int] = None 
     percentage_completion: Optional[int] = None
+    notes: Optional[str] = None  
 
 class User(BaseModel):
     id: int
@@ -32,11 +33,12 @@ class User(BaseModel):
 class StudySession(BaseModel):
     id: int
     user_id: int
+    subject: str  
     start_time: datetime
     end_time: datetime
-    duration_minutes: int
     quality: Optional[int] = None
     percentage_completion: Optional[int] = None
+    notes: Optional[str] = None 
     
     class Config:
         from_attributes = True
@@ -46,9 +48,13 @@ class UserLogin(BaseModel):
     password: str
 
 class UserUpdate(BaseModel):
-    id: int
     username: Optional[str] = None
     email: Optional[str] = None
     gender: Optional[str] = None
     age: Optional[int] = None
     user_class: Optional[str] = None
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: User

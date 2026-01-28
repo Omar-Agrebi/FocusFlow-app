@@ -2,5 +2,8 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
+'pydantic[email]'
 python-dotenv
 passlib[bcrypt,argon2]
+python-multipart
+python-jose[cryptography]
