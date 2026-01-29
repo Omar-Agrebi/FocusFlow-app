@@ -2,10 +2,18 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
+<<<<<<< HEAD
 pydantic[email]
+=======
+'pydantic[email]'
+>>>>>>> ea9dea0e697308b32268fb802aa960748b7cd232
 pydantic-settings
 python-dotenv
 passlib[bcrypt,argon2]
 python-multipart
+<<<<<<< HEAD
 python-jose[cryptography]
 psycopg2
+=======
+python-jose[cryptography]
+>>>>>>> ea9dea0e697308b32268fb802aa960748b7cd232

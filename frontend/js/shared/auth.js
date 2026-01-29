@@ -26,9 +26,15 @@ const Auth = {
     },
 
     // Register function
+<<<<<<< HEAD
     async register({ username, email, password, gender, birthdate, user_class }) {
         try {
             const response = await API.register({ username, email, password, gender, birthdate, user_class });
+=======
+    async register({ username, email, password, gender, age, user_class }) {
+        try {
+            const response = await API.register({ username, email, password, gender, age, user_class });
+>>>>>>> ea9dea0e697308b32268fb802aa960748b7cd232
             Utils.saveToStorage('user', response.user);
             Utils.saveToStorage('token', response.access_token);
             return { success: true, user: response.user };
