@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
     gender: Optional[str] = None
-    age: Optional[int] = Field(None, ge=0)
+    birthdate: Optional[date] = None
     user_class: Optional[str] = None
 
 class SessionCreate(BaseModel):
@@ -24,7 +24,7 @@ class User(BaseModel):
     username: str
     email: str
     gender: Optional[str] = None
-    age: Optional[int] = None
+    birthdate: Optional[date] = None
     user_class: Optional[str] = None
     
     class Config:
@@ -51,7 +51,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
     gender: Optional[str] = None
-    age: Optional[int] = None
+    birthdate: Optional[date] = None
     user_class: Optional[str] = None
 
 class LoginResponse(BaseModel):

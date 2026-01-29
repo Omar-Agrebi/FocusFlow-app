@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Date
 from database import Base
 
 class User(Base):
@@ -8,7 +8,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String) 
     gender = Column(String)
-    age = Column(Integer)
+    birthdate = Column(Date)
     user_class = Column(String)
     
 class StudySession(Base):
@@ -16,7 +16,9 @@ class StudySession(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     start_time = Column(DateTime)
+    subject = Column(String)
     end_time = Column(DateTime)
     duration_minutes = Column(Integer)
     quality = Column(Integer)
     percentage_completion = Column(Integer)
+    notes = Column(String, nullable=True)
