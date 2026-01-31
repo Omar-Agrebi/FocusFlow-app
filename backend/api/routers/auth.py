@@ -1,12 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import jwt
-from config import settings
+from passlib.context import CryptContext
 
+from config import settings
 from database import get_db
 import models, schemas
-from passlib.context import CryptContext
+from crud import create_user
+
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -18,6 +21,20 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = int(payload.get("sub"))
+    except:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 router = APIRouter()
@@ -36,10 +53,9 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": user
+        "user": schemas.User.model_validate(user)
     }
 
 @router.post("/register")
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    from crud import create_user
     return create_user(db, user)

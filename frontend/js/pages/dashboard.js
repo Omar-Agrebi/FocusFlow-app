@@ -33,18 +33,17 @@ const Dashboard = {
     loadUserData() {
         try {
             const user = Auth.getCurrentUser();
-            
-            if (user && user.name) {
-                // Update welcome message immediately
+
+            if (user) {
+                const displayName = user.username || user.email;
+
                 const welcomeName = document.getElementById('welcomeName');
                 if (welcomeName) {
-                    const firstName = user.name.split(' ')[0];
-                    welcomeName.textContent = firstName;
+                    welcomeName.textContent = displayName.split(' ')[0];
                     welcomeName.classList.remove('loading-placeholder');
                 }
-                
-                // Update user info in header immediately
-                this.updateUserHeader(user);
+
+                this.updateUserHeader({ name: displayName });
             }
             
         } catch (error) {

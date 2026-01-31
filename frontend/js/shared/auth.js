@@ -9,7 +9,7 @@ const Auth = {
 
     // Get current user
     getCurrentUser() {
-        return Utils.getFromStorage('user', { name: 'Guest', email: '' });
+    return Utils.getFromStorage('user', { username: 'Guest', email: '' });
     },
 
     // Login function

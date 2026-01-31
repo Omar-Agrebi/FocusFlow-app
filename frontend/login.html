@@ -100,7 +100,7 @@
                 submitBtn.disabled = true;
                 
                 // Login
-                const result = await Auth.login(email, password);
+                const result = await Auth.login({email, password});
                 
                 // Reset button
                 submitBtn.innerHTML = originalText;
