@@ -56,6 +56,17 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
         "user": schemas.User.model_validate(user)
     }
 
-@router.post("/register")
+@router.post("/register", response_model=schemas.LoginResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return create_user(db, user)
+    db_user = create_user(db, user)
+    
+    # Create access token for auto-login
+    access_token = create_access_token(
+        data={"sub": str(db_user.id)}
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": schemas.User.model_validate(db_user)
+    }

@@ -42,7 +42,8 @@ def update_session(
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    for key, value in session.dict().items():
+    # Update fields but NEVER allow user_id to be changed
+    for key, value in session.dict(exclude={'user_id'}).items():
         setattr(db_session, key, value)
     db.commit()
     db.refresh(db_session)
