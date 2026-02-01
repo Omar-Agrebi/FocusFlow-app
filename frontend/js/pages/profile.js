@@ -7,17 +7,25 @@ const Profile = {
         this.loadProfileData(); // Then load other data
     },
     
-    // Load user data IMMEDIATELY
+    // Load user data IMMEDIATELY (match Dashboard pattern)
     loadUserData() {
         try {
             const user = Auth.getCurrentUser();
-            
+
             if (user) {
-                // Update profile header immediately
-                this.updateProfileHeader(user);
+                const displayName = user.username || user.email;
+
+                const welcomeName = document.getElementById('welcomeName');
+                if (welcomeName) {
+                    welcomeName.textContent = displayName.split(' ')[0];
+                    welcomeName.classList.remove('loading-placeholder');
+                }
+
+                // Update user header (like Dashboard does)
+                this.updateUserHeader({ name: displayName });
                 
-                // Update form fields immediately
-                this.updateFormFields(user);
+                // Also update profile header with full user object
+                this.updateProfileHeader(user);
             }
             
         } catch (error) {
@@ -25,19 +33,51 @@ const Profile = {
         }
     },
     
+    // Update user header immediately (like Dashboard)
+    updateUserHeader(user) {
+        // Update user avatar in main header
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar && user.name) {
+            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            userAvatar.textContent = initials;
+            userAvatar.classList.remove('loading-placeholder');
+        }
+        
+        // Update user name in main header
+        const userName = document.getElementById('userName');
+        if (userName && user.name) {
+            userName.textContent = user.name;
+            userName.classList.remove('loading-placeholder');
+        }
+    },
+    
     // Update profile header immediately
     updateProfileHeader(user) {
+        // Get display name from user object
+        const displayName = user.username || user.name || user.email;
+        
+        if (!displayName) {
+            console.warn('No display name found for user:', user);
+            return;
+        }
+        
         // Update profile name display
         const profileNameDisplay = document.getElementById('profileNameDisplay');
-        if (profileNameDisplay && user.name) {
-            profileNameDisplay.textContent = user.name;
+        if (profileNameDisplay) {
+            profileNameDisplay.textContent = displayName.split(' ')[0];
             profileNameDisplay.classList.remove('loading-placeholder');
         }
         
         // Update profile class display
         const profileClassDisplay = document.getElementById('profileClassDisplay');
-        if (profileClassDisplay && user.class) {
-            profileClassDisplay.textContent = user.class;
+        if (profileClassDisplay) {
+            // Check for class or user_class property
+            const userClass = user.class || user.user_class;
+            if (userClass) {
+                profileClassDisplay.textContent = userClass;
+            } else {
+                profileClassDisplay.textContent = 'Not set';
+            }
             profileClassDisplay.classList.remove('loading-placeholder');
         }
         
@@ -50,8 +90,8 @@ const Profile = {
         
         // Update profile avatar
         const profileAvatar = document.getElementById('profileAvatar');
-        if (profileAvatar && user.name) {
-            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        if (profileAvatar && displayName) {
+            const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
             profileAvatar.textContent = initials;
             profileAvatar.classList.remove('loading-placeholder');
         }
@@ -70,7 +110,7 @@ const Profile = {
         if (profileGoal && user.studyGoal) profileGoal.value = user.studyGoal;
     },
     
-    // Rename your existing loadData() to loadProfileData()
+    // Load profile data
     async loadProfileData() {
         try {
             // Load profile stats
@@ -279,8 +319,8 @@ const Profile = {
                 user.studyGoal = profileData.study_goal;
                 Utils.saveToStorage('user', user);
                 
-                // Update UI
-                Components.loadUserData();
+                // Update UI (reload user data)
+                this.loadUserData();
                 Utils.showNotification('Profile updated successfully!', 'success');
                 
             } catch (apiError) {
@@ -295,6 +335,27 @@ const Profile = {
         } catch (error) {
             console.error('Error saving profile:', error);
             Utils.showNotification('Failed to update profile', 'error');
+        }
+    },
+    
+    // Save preferences
+    async savePreferences() {
+        try {
+            const preferences = {
+                focusLength: parseInt(document.getElementById('focusLength').value),
+                breakReminders: document.getElementById('breakReminders').value,
+                notifications: document.getElementById('notifications').value,
+                theme: document.getElementById('theme').value
+            };
+            
+            // Save to localStorage
+            Utils.saveToStorage('preferences', preferences);
+            
+            Utils.showNotification('Preferences saved successfully!', 'success');
+            
+        } catch (error) {
+            console.error('Error saving preferences:', error);
+            Utils.showNotification('Failed to save preferences', 'error');
         }
     }
 };
