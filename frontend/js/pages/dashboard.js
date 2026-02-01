@@ -209,7 +209,7 @@ const Dashboard = {
                 <i class="fas fa-book-open empty-icon"></i>
                 <h3>No Recent Sessions</h3>
                 <p>Start your first study session to see it here!</p>
-                <a href="log-session.html" class="btn btn-primary btn-sm">
+                <a href="session.html" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Start First Session
                 </a>
             </div>

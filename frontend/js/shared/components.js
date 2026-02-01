@@ -91,42 +91,6 @@ const Components = {
         const now = new Date();
         const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
         input.value = localTime.toISOString().slice(0, 16);
-    },
-    
-    // Load user data into header
-    loadUserData() {
-        const user = Auth.getCurrentUser();
-        
-        // Update header
-        const avatarElements = document.querySelectorAll('#userAvatar, #profileAvatar');
-        const nameElements = document.querySelectorAll('#userName, #welcomeName, #profileNameDisplay');
-        
-        avatarElements.forEach(el => {
-            if (el && user.name) {
-                el.textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-            }
-        });
-        
-        nameElements.forEach(el => {
-            if (el && user.name) {
-                el.textContent = user.name.split(' ')[0]; // First name only for welcome
-            }
-        });
-        
-        // Update profile page if exists
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileClass = document.getElementById('profileClass');
-        const profileGoal = document.getElementById('profileGoal');
-        const profileClassDisplay = document.getElementById('profileClassDisplay');
-        const profileEmailDisplay = document.getElementById('profileEmailDisplay');
-        
-        if (profileName && user.name) profileName.value = user.name;
-        if (profileEmail && user.email) profileEmail.value = user.email;
-        if (profileClass && user.class) profileClass.value = user.class;
-        if (profileGoal && user.studyGoal) profileGoal.value = user.studyGoal;
-        if (profileClassDisplay && user.class) profileClassDisplay.textContent = user.class;
-        if (profileEmailDisplay && user.email) profileEmailDisplay.textContent = user.email;
     }
 };
 

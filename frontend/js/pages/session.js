@@ -184,7 +184,7 @@ const Session = {
             const durationMinutes = parseInt(document.getElementById('duration').value);
             const quality = parseInt(document.getElementById('quality').value) || null;
             const completion = parseInt(document.getElementById('completion').value) || null;
-            const notes = document.getElementById('notes').value || '';
+            const notes = document.getElementById('notes').value || null;
             
             // Validate
             if (!subject) {
@@ -192,36 +192,40 @@ const Session = {
                 return;
             }
             
-            // Calculate end time
-            const startDate = new Date(startTime);
-            const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+            // Calculate start and end times
+            let startDate = new Date(startTime);
+            let actualDuration = durationMinutes;
             
-            // Prepare session data for API
+            // If timer was used, use timer duration instead
+            if (this.timer.seconds > 0) {
+                const timerMinutes = Math.floor(this.timer.seconds / 60);
+                if (timerMinutes > 0) {
+                    actualDuration = timerMinutes;
+                }
+            }
+            
+            // Calculate end time based on duration
+            const endDate = new Date(startDate.getTime() + actualDuration * 60000);
+            
+            // MATCHES BACKEND SCHEMA EXACTLY
             const sessionData = {
-                user_id: userId,
+                user_id: parseInt(userId),  // Backend will override this with current_user.id
                 subject: subject,
                 start_time: startDate.toISOString(),
                 end_time: endDate.toISOString(),
-                duration_minutes: durationMinutes,
                 quality: quality,
                 percentage_completion: completion,
                 notes: notes
             };
             
-            // If timer was used, use timer duration
-            if (this.timer.seconds > 0) {
-                const timerMinutes = Math.floor(this.timer.seconds / 60);
-                if (timerMinutes > 0) {
-                    sessionData.duration_minutes = timerMinutes;
-                    const timerEndDate = new Date(startDate.getTime() + timerMinutes * 60000);
-                    sessionData.end_time = timerEndDate.toISOString();
-                }
-            }
+            console.log('Sending session data:', sessionData);
             
             Utils.showNotification('Saving session...', 'info');
             
             // CALL REAL API
             const savedSession = await API.createSession(sessionData);
+            
+            console.log('Session saved:', savedSession);
             
             // Show success
             Utils.showNotification('Session saved successfully!', 'success');
@@ -236,52 +240,13 @@ const Session = {
             
             // Optionally redirect to dashboard or history
             setTimeout(() => {
-                // Update dashboard if we're still on the page
-                if (typeof Dashboard !== 'undefined' && Dashboard.loadData) {
-                    Dashboard.loadData();
-                }
-                
-                // Or navigate to dashboard
-                const dashboardLink = document.querySelector('.nav-link[data-page="dashboard"]');
-                if (dashboardLink) {
-                    dashboardLink.click();
-                }
+                // Navigate to history page
+                window.location.href = 'history.html';
             }, 1500);
             
         } catch (error) {
             console.error('Error saving session:', error);
-            
-            // Fallback to localStorage if API fails
-            Utils.showNotification('API unavailable, saving locally...', 'warning');
-            await this.saveSessionToLocalStorage();
-        }
-    },
-    
-    // Fallback: Save to localStorage
-    async saveSessionToLocalStorage() {
-        try {
-            const sessions = Utils.getFromStorage('sessions', []);
-            
-            const sessionData = {
-                id: sessions.length + 1,
-                subject: document.getElementById('subject').value,
-                start_time: new Date().toISOString(),
-                duration_minutes: parseInt(document.getElementById('duration').value),
-                quality: parseInt(document.getElementById('quality').value) || null,
-                percentage_completion: parseInt(document.getElementById('completion').value) || null,
-                notes: document.getElementById('notes').value || '',
-                user_id: localStorage.getItem('userId') || 1
-            };
-            
-            sessions.push(sessionData);
-            Utils.saveToStorage('sessions', sessions);
-            
-            Utils.showNotification('Session saved locally (API unavailable)', 'success');
-            this.resetForm();
-            
-        } catch (error) {
-            console.error('Error saving to localStorage:', error);
-            Utils.showNotification('Failed to save session', 'error');
+            Utils.showNotification(`Failed to save session: ${error.message}`, 'error');
         }
     },
     
