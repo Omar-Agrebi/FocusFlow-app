@@ -174,11 +174,23 @@ const Dashboard = {
             return;
         }
 
-        container.innerHTML = sessions.map(session => `
-            <div class="session-card ${this.getSessionStatusClass(session)}">
+        container.innerHTML = sessions.map(session => {
+            // Calculate duration if not present
+            let duration = session.duration;
+            if (!duration && session.start_time && session.end_time) {
+                const start = new Date(session.start_time);
+                const end = new Date(session.end_time);
+                duration = Math.round((end - start) / 60000); // minutes
+            }
+
+            // Map percentage_completion to completion
+            const completion = session.percentage_completion !== undefined ? session.percentage_completion : (session.completion || 0);
+
+            return `
+            <div class="session-card ${this.getSessionStatusClass({ ...session, completion })}">
                 <div class="session-header">
                     <div class="session-title">${session.subject || 'No Subject'}</div>
-                    <div class="session-duration">${this.formatDuration(session.duration)}</div>
+                    <div class="session-duration">${this.formatDuration(duration || 0)}</div>
                 </div>
                 <div class="session-meta">
                     <span class="session-time">
@@ -196,7 +208,7 @@ const Dashboard = {
                     </div>
                 ` : ''}
             </div>
-        `).join('');
+        `}).join('');
     },
 
     // Show empty state for recent sessions
@@ -266,7 +278,14 @@ const Dashboard = {
             const dayIndex = (sessionDate.getDay() + 6) % 7; // Monday = 0
 
             if (dayIndex >= 0 && dayIndex < 7) {
-                weeklyData[dayIndex].hours += (session.duration || 0) / 60;
+                let duration = session.duration;
+                if (!duration && session.start_time && session.end_time) {
+                    const start = new Date(session.start_time);
+                    const end = new Date(session.end_time);
+                    duration = Math.round((end - start) / 60000); // minutes
+                }
+
+                weeklyData[dayIndex].hours += (duration || 0) / 60;
             }
         });
 
@@ -326,8 +345,9 @@ const Dashboard = {
 
     // Get session status class
     getSessionStatusClass(session) {
-        if (session.completion >= 90) return 'completed';
-        if (session.completion >= 50) return 'in-progress';
+        const completion = session.percentage_completion !== undefined ? session.percentage_completion : (session.completion || 0);
+        if (completion >= 90) return 'completed';
+        if (completion >= 50) return 'in-progress';
         return 'not-started';
     },
 

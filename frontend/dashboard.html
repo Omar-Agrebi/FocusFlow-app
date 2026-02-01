@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - StudyFlow</title>
-    
+
     <!-- Shared CSS -->
     <link rel="stylesheet" href="css/shared/variables.css">
     <link rel="stylesheet" href="css/shared/layout.css">
     <link rel="stylesheet" href="css/shared/header.css">
     <link rel="stylesheet" href="css/shared/buttons.css">
     <link rel="stylesheet" href="css/shared/cards.css">
-    
+
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="css/pages/dashboard.css">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <!-- Header Navigation -->
     <header class="header">
@@ -26,28 +28,28 @@
                 <i class="fas fa-graduation-cap logo-icon"></i>
                 <span class="logo-text">StudyFlow</span>
             </a>
-            
+
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
             </button>
-            
+
             <nav>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="dashboard.html" class="nav-link active">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a></li>
+                            <i class="fas fa-home"></i> Dashboard
+                        </a></li>
                     <li><a href="session.html" class="nav-link">
-                        <i class="fas fa-plus-circle"></i> New Session
-                    </a></li>
+                            <i class="fas fa-plus-circle"></i> New Session
+                        </a></li>
                     <li><a href="history.html" class="nav-link">
-                        <i class="fas fa-history"></i> History
-                    </a></li>
+                            <i class="fas fa-history"></i> History
+                        </a></li>
                     <li><a href="profile.html" class="nav-link">
-                        <i class="fas fa-user"></i> Profile
-                    </a></li>
+                            <i class="fas fa-user"></i> Profile
+                        </a></li>
                 </ul>
             </nav>
-            
+
             <div class="user-info">
                 <div class="user-avatar loading-placeholder" id="userAvatar">U</div>
                 <span class="user-name loading-placeholder" id="userName">Loading...</span>
@@ -63,10 +65,11 @@
         <div class="container">
             <!-- Welcome Section -->
             <div class="welcome-section">
-                <h1 class="welcome-title">Welcome back, <span id="welcomeName" class="loading-placeholder">User</span>! 👋</h1>
+                <h1 class="welcome-title">Welcome back, <span id="welcomeName" class="loading-placeholder">User</span>!
+                    👋</h1>
                 <p class="welcome-subtitle">Keep up the great work with your studies!</p>
             </div>
-            
+
 
             <!-- Today's Stats -->
             <div class="stats-grid">
@@ -145,27 +148,28 @@
     <script src="js/pages/dashboard.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Check authentication
             if (!Auth.isLoggedIn()) {
                 window.location.href = 'login.html';
                 return;
             }
-            
+
             // Initialize mobile menu
             Components.initMobileMenu();
-            
+
             // Initialize logout button
-            document.getElementById('logoutBtn').addEventListener('click', function() {
+            document.getElementById('logoutBtn').addEventListener('click', function () {
                 Auth.logout();
             });
-            
+
             // Initialize dashboard
             Dashboard.init();
-            
+
             // Check for first login message
             Dashboard.checkFirstLogin();
         });
     </script>
 </body>
+
 </html>
