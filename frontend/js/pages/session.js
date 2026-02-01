@@ -18,10 +18,17 @@ const Session = {
     loadUserData() {
         try {
             const user = Auth.getCurrentUser();
-            
+
             if (user) {
-                // Update user info in header immediately
-                this.updateUserHeader(user);
+                const displayName = user.username || user.email;
+
+                const welcomeName = document.getElementById('welcomeName');
+                if (welcomeName) {
+                    welcomeName.textContent = displayName.split(' ')[0];
+                    welcomeName.classList.remove('loading-placeholder');
+                }
+
+                this.updateUserHeader({ name: displayName });
             }
             
         } catch (error) {

@@ -15,18 +15,19 @@ const History = {
     loadUserData() {
         try {
             const user = Auth.getCurrentUser();
-            
+
             if (user) {
-                // Update user info in header
-                this.updateUserHeader(user);
+                const displayName = user.username || user.email;
+
+                this.updateUserHeader({ name: displayName });
             }
             
         } catch (error) {
             console.error('Error loading user data:', error);
         }
     },
-
-    // Update user header
+    
+    // Update user header immediately
     updateUserHeader(user) {
         // Update user avatar
         const userAvatar = document.getElementById('userAvatar');
@@ -43,7 +44,7 @@ const History = {
             userName.classList.remove('loading-placeholder');
         }
     },
-    
+        
     // Setup event listeners
     setupEventListeners() {
         // Filter buttons
