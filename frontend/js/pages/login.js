@@ -48,38 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const result = await Auth.login({ email, password });
 
-            // Map backend response to expected frontend format
-            if (result.access_token) {
-                result.success = true;
-                result.user = result.user;
-                result.message = 'Login successful';
-            } else {
-                result.success = false;
-            }
-
-
             if (result.success) {
-                // Save email if "Remember me" is checked
                 if (rememberMe) {
                     Utils.saveToStorage('remembered_email', email);
                 } else {
                     Utils.removeFromStorage('remembered_email');
                 }
 
-                // Show success message before redirect
                 Utils.showNotification('Login successful! Redirecting...', 'success');
-                
-                // Small delay to show the message
+
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 800);
+
             } else {
                 Utils.showNotification(result.message || 'Login failed. Check your credentials.', 'error');
-                // Add shake animation for visual feedback
                 form.classList.add('shake');
                 setTimeout(() => form.classList.remove('shake'), 500);
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Login error:', error);
             Utils.showNotification('An unexpected error occurred', 'error');
         } finally {

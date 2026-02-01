@@ -1,34 +1,38 @@
 const API_BASE_URL = 'http://localhost:8000';
 
 const API = {
-    async request(endpoint, options = {}) {
+        async request(endpoint, options = {}) {
         const token = localStorage.getItem('token');
-        
+
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers
         };
-        
+
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers
+        });
+
+        let data;
         try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                ...options,
-                headers
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
+            data = await response.json();
+        } catch {
+            data = null;
         }
+
+        if (!response.ok) {
+            const message = data?.detail || data?.message || `HTTP ${response.status}`;
+            throw new Error(message);
+        }
+
+        return data;
     },
+
     
     // Sessions
     getSessions(params = {}) {

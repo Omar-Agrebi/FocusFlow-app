@@ -16,12 +16,18 @@ const Auth = {
     async login({ email, password }) {
         try {
             const response = await API.login({ email, password });
+
+            if (!response.access_token) {
+                throw new Error("No token returned by server");
+            }
+
             Utils.saveToStorage('user', response.user);
             Utils.saveToStorage('token', response.access_token);
+
             return { success: true, user: response.user };
         } catch (error) {
             console.error('Login failed:', error);
-            return { success: false, message: error.message || 'Login failed. Please try again.' };
+            return { success: false, message: error.message };
         }
     },
 
