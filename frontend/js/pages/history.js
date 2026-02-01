@@ -75,8 +75,9 @@ const History = {
             const tableBody = document.getElementById('historyTableBody');
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Loading...</td></tr>';
 
-            // Get user_id - if you have auth, get from localStorage, else default to 1
-            const userId = localStorage.getItem('userId') || 1;
+            // Get user_id from auth or default
+            const user = Auth.getCurrentUser();
+            const userId = user ? user.id : 1;
 
             // USE YOUR API.JS - clean API call
             let sessions = await API.getSessions({ user_id: userId });
