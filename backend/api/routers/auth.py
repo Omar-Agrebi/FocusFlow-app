@@ -28,11 +28,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id = int(payload.get("sub"))
-    except:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    except Exception as e:
+        print(f"DEBUG: Token validation failed: {e}")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {str(e)}")
     
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
+        print(f"DEBUG: User not found for ID {user_id}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
@@ -56,6 +58,14 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
         "user": schemas.User.model_validate(user)
     }
 
-@router.post("/register")
+@router.post("/register", response_model=schemas.LoginResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return create_user(db, user)
+    db_user = create_user(db, user)
+    access_token = create_access_token(
+        data={"sub": str(db_user.id)}
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": schemas.User.model_validate(db_user)
+    }

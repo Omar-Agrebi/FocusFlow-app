@@ -26,6 +26,14 @@ const API = {
         }
 
         if (!response.ok) {
+            if (response.status === 401) {
+                // Token invalid or expired - logout user
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html?expired=true';
+                return null;
+            }
+
             const message = data?.detail || data?.message || `HTTP ${response.status}`;
             throw new Error(message);
         }
