@@ -29,12 +29,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id = int(payload.get("sub"))
     except Exception as e:
-        print(f"DEBUG: Token validation failed: {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {str(e)}")
     
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
-        print(f"DEBUG: User not found for ID {user_id}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 

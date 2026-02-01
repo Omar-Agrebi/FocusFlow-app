@@ -75,9 +75,14 @@ const History = {
             const tableBody = document.getElementById('historyTableBody');
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Loading...</td></tr>';
 
-            // Get user_id from auth or default
+            // Get user_id from auth
             const user = Auth.getCurrentUser();
-            const userId = user ? user.id : 1;
+
+            if (!user || !user.id) {
+                throw new Error("User not authenticated");
+            }
+
+            const userId = user.id;
 
             // USE YOUR API.JS - clean API call
             let sessions = await API.getSessions({ user_id: userId });
