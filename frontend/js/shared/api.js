@@ -108,7 +108,12 @@ const API = {
 
     getHistoryStats() {
         return this.request('/api/stats/history/');
-    }
+    },
+
+    forgotPassword(data) {
+    return this.post("/auth/forgot-password", data);
+    
+}
 };
 
 window.API = API;
