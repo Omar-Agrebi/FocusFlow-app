@@ -9,3 +9,5 @@ passlib[bcrypt,argon2]
 python-multipart
 python-jose[cryptography]
 psycopg2-binary
+sib-api-v3-sdk
+alembic
