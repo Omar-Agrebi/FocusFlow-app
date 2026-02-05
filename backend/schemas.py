@@ -54,7 +54,17 @@ class UserUpdate(BaseModel):
     birthdate: Optional[date] = None
     user_class: Optional[str] = None
 
+class EmailVerificationRequest(BaseModel):
+    email: str
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
 class LoginResponse(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str
+    is_verified: bool
     user: User
