@@ -9,7 +9,7 @@ from config import settings
 from database import get_db
 import models, schemas
 from crud import create_user
-from email.service import email_service
+from email_mailer.service import email_service
 
 
 SECRET_KEY = settings.SECRET_KEY

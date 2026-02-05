@@ -5,8 +5,8 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from sqlalchemy.orm import Session
 
-from email.templates import EmailTemplates
-from email.tokens import TokenManager
+from email_mailer.templates import EmailTemplates
+from email_mailer.tokens import TokenManager
 
 load_dotenv()
 
