@@ -91,11 +91,11 @@ const API = {
 
     // Profile
     getProfile() {
-        return this.request('/api/profile/');
+        return this.request('/api/profile/me');
     },
 
     updateProfile(data) {
-        return this.request('/api/profile/', {
+        return this.request('/api/profile/me', {
             method: 'PUT',
             body: JSON.stringify(data)
         });
@@ -111,9 +111,18 @@ const API = {
     },
 
     forgotPassword(data) {
-    return this.post("/auth/forgot-password", data);
-    
-}
+        return this.request('/api/auth/forgot-password/', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    resetPassword(token, newPassword) {
+        return this.request('/api/auth/reset-password/', {
+            method: 'POST',
+            body: JSON.stringify({ token, new_password: newPassword })
+        });
+    }
 };
 
 window.API = API;

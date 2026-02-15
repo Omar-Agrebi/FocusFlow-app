@@ -1,9 +1,7 @@
-"""
-Token management for email verification and password reset
-"""
 import secrets
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from models import PasswordReset, EmailVerification 
 
 
 class TokenManager:
@@ -17,7 +15,6 @@ class TokenManager:
     @staticmethod
     def create_verification_token(db: Session, user_id: int) -> str:
         """Create and save email verification token"""
-        from models import EmailVerification  # Avoid circular import
         
         token = TokenManager.generate_token()
         expires_at = datetime.utcnow() + timedelta(hours=24)
@@ -35,7 +32,6 @@ class TokenManager:
     @staticmethod
     def create_password_reset_token(db: Session, user_id: int) -> str:
         """Create and save password reset token"""
-        from models import PasswordReset  # Avoid circular import
         
         token = TokenManager.generate_token()
         expires_at = datetime.utcnow() + timedelta(hours=1)
