@@ -105,8 +105,8 @@ def resend_verification(email: str, db: Session = Depends(get_db)):
     return {"message": "Verification email sent"}
 
 @router.post("/forgot-password")
-def forgot_password(email: str, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == email).first()
+def forgot_password(request: schemas.PasswordResetRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == request.email).first()
 
     if not user:
         return {"message": "If the email exists, a reset link was sent"}  # security best practice
@@ -116,9 +116,9 @@ def forgot_password(email: str, db: Session = Depends(get_db)):
     return {"message": "Password reset email sent"}
 
 @router.post("/reset-password")
-def reset_password(token: str, new_password: str, db: Session = Depends(get_db)):
+def reset_password(request: schemas.PasswordResetConfirm, db: Session = Depends(get_db)):
     reset = db.query(models.PasswordReset).filter(
-        models.PasswordReset.token == token,
+        models.PasswordReset.token == request.token,
         models.PasswordReset.is_used == False
     ).first()
 
@@ -126,7 +126,7 @@ def reset_password(token: str, new_password: str, db: Session = Depends(get_db))
         raise HTTPException(status_code=400, detail="Invalid or expired token")
 
     user = db.query(models.User).filter(models.User.id == reset.user_id).first()
-    user.password = pwd_context.hash(new_password)
+    user.password = pwd_context.hash(request.new_password)
     reset.is_used = True
 
     db.commit()
