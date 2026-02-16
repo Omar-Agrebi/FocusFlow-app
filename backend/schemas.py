@@ -68,3 +68,9 @@ class LoginResponse(BaseModel):
     token_type: str
     is_verified: bool
     user: User
+
+class ChatMessage(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    reply: str

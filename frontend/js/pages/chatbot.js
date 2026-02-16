@@ -6,6 +6,9 @@ const Chatbot = {
     sendBtn: null,
     typingIndicator: null,
     quickSuggestions: null,
+    socket: null,
+    currentBotMessageDiv: null,
+    isConnected: false,
 
     init() {
         // Get DOM elements
@@ -15,7 +18,7 @@ const Chatbot = {
         this.sendBtn = document.getElementById('sendBtn');
         this.typingIndicator = document.getElementById('typingIndicator');
         this.quickSuggestions = document.getElementById('quickSuggestions');
-
+        
         // Load user data FIRST
         this.loadUserData(); 
 
@@ -27,6 +30,9 @@ const Chatbot = {
 
         // Load user info
         this.loadUserInfo();
+
+        // Connect to WebSocket
+        this.connectWebSocket();
     },
 
     // Load user data IMMEDIATELY
@@ -119,6 +125,37 @@ const Chatbot = {
         }
     },
 
+    connectWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // Adjust port if running on different ports (e.g. frontend 5500, backend 8000)
+        // Assuming backend is at localhost:8000 for now based on typical setup
+        const wsUrl = `ws://localhost:8000/api/chatbot/ws`;
+
+        console.log('Connecting to WebSocket:', wsUrl);
+        this.socket = new WebSocket(wsUrl);
+
+        this.socket.onopen = () => {
+            console.log('WebSocket connected');
+            this.isConnected = true;
+        };
+
+        this.socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleWebSocketMessage(data);
+        };
+
+        this.socket.onclose = () => {
+            console.log('WebSocket disconnected');
+            this.isConnected = false;
+            // Try to reconnect after 3 seconds
+            setTimeout(() => this.connectWebSocket(), 3000);
+        };
+
+        this.socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+    },
+
     setupEventListeners() {
         // Form submit
         this.chatForm.addEventListener('submit', (e) => {
@@ -159,13 +196,14 @@ const Chatbot = {
         }
     },
 
-    async handleSendMessage() {
+    handleSendMessage() {
         const message = this.messageInput.value.trim();
         if (!message) return;
 
-        // Disable input and button
-        this.messageInput.disabled = true;
-        this.sendBtn.disabled = true;
+        if (!this.isConnected) {
+            this.showError('Not connected to chat server. Please wait...');
+            return;
+        }
 
         // Add user message to UI
         this.addMessage(message, 'user');
@@ -181,39 +219,41 @@ const Chatbot = {
         // Show typing indicator
         this.showTypingIndicator();
 
-        try {
-            // Send message to API
-            const response = await API.post('/api/chatbot/message', { message });
+        // Send message to WebSocket
+        this.socket.send(JSON.stringify({ message }));
 
-            // Hide typing indicator
+        // Prepare a new bot message container
+        this.currentBotMessageDiv = null;
+    },
+
+    handleWebSocketMessage(data) {
+        if (data.type === 'chunk') {
             this.hideTypingIndicator();
-
-            // Add bot response to UI
-            if (response && response.reply) {
-                this.addMessage(response.reply, 'bot');
-            } else {
-                throw new Error('Invalid response from server');
+            if (!this.currentBotMessageDiv) {
+                this.currentBotMessageDiv = this.createMessageDiv('bot');
+                this.messagesContainer.appendChild(this.currentBotMessageDiv);
             }
-        } catch (error) {
-            console.error('Error sending message:', error);
+            // Append text to the current message
+            const textElement = this.currentBotMessageDiv.querySelector('.message-text');
+            textElement.textContent += data.content;
+            this.scrollToBottom();
+        } else if (data.type === 'complete') {
             this.hideTypingIndicator();
-            this.showError('Sorry, I encountered an error. Please try again.');
-        } finally {
-            // Re-enable input and button
-            this.messageInput.disabled = false;
-            this.sendBtn.disabled = false;
-            this.messageInput.focus();
+            this.currentBotMessageDiv = null;
+            this.saveChatHistory();
+        } else if (data.type === 'error') {
+            this.hideTypingIndicator();
+            this.showError(data.message);
         }
     },
 
-    addMessage(text, sender) {
+    createMessageDiv(sender) {
         // Remove welcome message if it exists
         const welcomeMessage = this.messagesContainer.querySelector('.welcome-message');
         if (welcomeMessage) {
             welcomeMessage.remove();
         }
 
-        // Create message element
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
 
@@ -222,7 +262,7 @@ const Chatbot = {
 
         const messageText = document.createElement('p');
         messageText.className = 'message-text';
-        messageText.textContent = text;
+        messageText.textContent = ''; // Start empty
 
         const messageTime = document.createElement('span');
         messageTime.className = 'message-time';
@@ -232,13 +272,14 @@ const Chatbot = {
         messageContent.appendChild(messageTime);
         messageDiv.appendChild(messageContent);
 
-        // Add to container
-        this.messagesContainer.appendChild(messageDiv);
+        return messageDiv;
+    },
 
-        // Scroll to bottom
+    addMessage(text, sender) {
+        const div = this.createMessageDiv(sender);
+        div.querySelector('.message-text').textContent = text;
+        this.messagesContainer.appendChild(div);
         this.scrollToBottom();
-
-        // Save to session storage
         this.saveChatHistory();
     },
 
