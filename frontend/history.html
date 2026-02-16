@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - StudyFlow</title>
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="css/shared/variables.css">
+    <link rel="stylesheet" href="css/shared/layout.css">
+    <link rel="stylesheet" href="css/shared/header.css">
+    <link rel="stylesheet" href="css/shared/buttons.css">
+    <link rel="stylesheet" href="css/shared/cards.css">
+
+    <!-- Page-specific CSS -->
+    <link rel="stylesheet" href="css/pages/history.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-graduation-cap logo-icon"></i>
+                <span class="logo-text">StudyFlow</span>
+            </a>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a></li>
+                    <li><a href="session.html" class="nav-link">
+                            <i class="fas fa-plus-circle"></i> New Session
+                        </a></li>
+                    <li><a href="history.html" class="nav-link active">
+                            <i class="fas fa-history"></i> History
+                        </a></li>
+                    <li><a href="chatbot.html" class="nav-link">
+                            <i class="fas fa-robot"></i> AI Assistant
+                        </a></li>
+                    <li><a href="profile.html" class="nav-link">
+                            <i class="fas fa-user"></i> Profile
+                        </a></li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-avatar loading-placeholder" id="userAvatar">U</div>
+                <span class="user-name loading-placeholder" id="userName">Loading...</span>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title">Study History</h1>
+
+            <!-- Stats -->
+            <div class="stats-grid" style="margin-bottom: var(--space-xl);">
+                <div class="stat-card card">
+                    <div class="stat-value" id="historyTotalTime">00h 00m</div>
+                    <div class="stat-label">Total Study Time</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value" id="historyTotalSessions">,</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value" id="historyAvgDuration">00m</div>
+                    <div class="stat-label">Avg. Duration</div>
+                </div>
+                <div class="stat-card card">
+                    <div class="stat-value" id="historyAvgQuality">?</div>
+                    <div class="stat-label">Avg. Quality</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card">
+                <div class="history-filters">
+                    <button class="filter-btn active" data-filter="all">All Time</button>
+                    <button class="filter-btn" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="week">This Week</button>
+                    <button class="filter-btn" data-filter="month">This Month</button>
+                    <button class="filter-btn" data-filter="year">This Year</button>
+                </div>
+
+                <!-- Sessions Table -->
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Duration</th>
+                                <th>Quality</th>
+                                <th>Complete</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Sessions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>No Study Sessions Found</h3>
+                    <p>Start your first study session to see it here!</p>
+                    <a href="session.html" class="btn btn-primary" style="margin-top: var(--space-md);">
+                        <i class="fas fa-plus"></i> Log First Session
+                    </a>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination" style="display: none;">
+                    <!-- Pagination buttons will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/shared/utils.js"></script>
+    <script src="js/shared/api.js"></script>
+    <script src="js/shared/auth.js"></script>
+    <script src="js/shared/components.js"></script>
+    <script src="js/pages/history.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check authentication
+            if (!Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize mobile menu
+            Components.initMobileMenu();
+
+            // Initialize logout button
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                Auth.logout();
+            });
+        });
+    </script>
+</body>
+
+</html>

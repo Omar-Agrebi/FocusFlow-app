@@ -1,0 +1,66 @@
+/* Log Session Page Styles */
+.timer-section {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+    color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    text-align: center;
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin: var(--space-lg) 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.timer-controls {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.session-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+/* Timer States */
+.timer-running {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .timer-display {
+        font-size: 3rem;
+    }
+}

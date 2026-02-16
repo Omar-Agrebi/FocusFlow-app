@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Session - StudyFlow</title>
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="css/shared/variables.css">
+    <link rel="stylesheet" href="css/shared/layout.css">
+    <link rel="stylesheet" href="css/shared/header.css">
+    <link rel="stylesheet" href="css/shared/buttons.css">
+    <link rel="stylesheet" href="css/shared/forms.css">
+    <link rel="stylesheet" href="css/shared/cards.css">
+
+    <!-- Page-specific CSS -->
+    <link rel="stylesheet" href="css/pages/session.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="dashboard.html" class="logo">
+                <i class="fas fa-graduation-cap logo-icon"></i>
+                <span class="logo-text">StudyFlow</span>
+            </a>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a></li>
+                    <li><a href="session.html" class="nav-link active">
+                            <i class="fas fa-plus-circle"></i> New Session
+                        </a></li>
+                    <li><a href="history.html" class="nav-link">
+                            <i class="fas fa-history"></i> History
+                        </a></li>
+                    <li><a href="chatbot.html" class="nav-link">
+                            <i class="fas fa-robot"></i> AI Assistant
+                        </a></li>
+                    <li><a href="profile.html" class="nav-link">
+                            <i class="fas fa-user"></i> Profile
+                        </a></li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-avatar loading-placeholder" id="userAvatar">U</div>
+                <span class="user-name loading-placeholder" id="userName">Loading...</span>
+                <button class="logout-btn" id="logoutBtn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title">Log Study Session</h1>
+
+            <!-- Timer Section -->
+            <div class="timer-section">
+                <h2 style="margin-bottom: var(--space-md);">Study Timer</h2>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-success btn-lg" id="startTimerBtn">
+                        <i class="fas fa-play"></i> Start Timer
+                    </button>
+                    <button class="btn btn-secondary btn-lg" id="pauseTimerBtn" style="display: none;">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button class="btn btn-danger btn-lg" id="stopTimerBtn" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Form -->
+            <div class="card">
+                <form id="sessionForm" class="session-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subject" class="form-label">Subject</label>
+                            <select id="subject" class="form-control form-select" required>
+                                <option value="">Select a subject</option>
+                                <option value="math">Mathematics</option>
+                                <option value="science">Science</option>
+                                <option value="language">Language Arts</option>
+                                <option value="history">History</option>
+                                <option value="coding">Coding/Programming</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="datetime-local" id="startTime" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Duration (minutes)</label>
+                        <div class="slider-container">
+                            <input type="range" id="duration" class="slider" min="15" max="180" value="60" step="15">
+                            <span class="slider-value" id="durationValue">60 min</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Quality Rating</label>
+                        <div class="star-rating" id="qualityRating">
+                            <i class="fas fa-star star" data-rating="1"></i>
+                            <i class="fas fa-star star" data-rating="2"></i>
+                            <i class="fas fa-star star" data-rating="3"></i>
+                            <i class="fas fa-star star" data-rating="4"></i>
+                            <i class="fas fa-star star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="quality" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Completion Percentage</label>
+                        <div class="slider-container">
+                            <input type="range" id="completion" class="slider" min="0" max="100" value="80" step="5">
+                            <span class="slider-value" id="completionValue">80%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes" class="form-label">Notes (optional)</label>
+                        <textarea id="notes" class="form-control"
+                            placeholder="Add any notes about this session..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Save Session
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-lg" id="resetBtn">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/shared/utils.js"></script>
+    <script src="js/shared/api.js"></script>
+    <script src="js/shared/auth.js"></script>
+    <script src="js/shared/components.js"></script>
+    <script src="js/pages/session.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check authentication
+            if (!Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize mobile menu
+            Components.initMobileMenu();
+
+            // Initialize logout button
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                Auth.logout();
+            });
+
+            // Initialize session page
+            Session.init();
+        });
+    </script>
+</body>
+
+</html>

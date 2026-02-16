@@ -1,0 +1,36 @@
+from fastapi import FastAPI
+from database import engine, Base
+import models
+from fastapi.middleware.cors import CORSMiddleware
+from api.routers import auth, sessions, profile, stats, chatbot
+
+
+app = FastAPI()
+
+# Create database tables on startup
+@app.on_event("startup")
+def startup_event():
+    Base.metadata.create_all(bind=engine)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "http://localhost:8080",
+    ],
+    allow_credentials=True,
+
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+# Prefix all routes with /api
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
+app.include_router(profile.router, prefix="/api/profile", tags=["profile"])
+app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
+app.include_router(chatbot.router, prefix="/api/chatbot", tags=["chatbot"])
