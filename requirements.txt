@@ -11,3 +11,5 @@ python-jose[cryptography]
 psycopg2-binary
 sib-api-v3-sdk
 alembic
+google-genai
+google-generativeai

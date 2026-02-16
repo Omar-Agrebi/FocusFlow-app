@@ -7,7 +7,7 @@ const Profile = {
         this.loadProfileData(); // Then load other data
     },
     
-    // Load user data IMMEDIATELY (match Dashboard pattern)
+    // Load user data IMMEDIATELY
     loadUserData() {
         try {
             const user = Auth.getCurrentUser();

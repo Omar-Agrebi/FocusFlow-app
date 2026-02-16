@@ -41,6 +41,18 @@ const API = {
         return data;
     },
 
+    // Generic methods for flexibility
+    get(endpoint) {
+        return this.request(endpoint);
+    },
+
+    post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
 
     // Sessions
     getSessions(params = {}) {

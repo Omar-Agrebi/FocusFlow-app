@@ -1,0 +1,32 @@
+from google.genai import Client
+
+# Replace with your real key
+API_KEY = "AIzaSyB5hggZbgAv1F0rB5ffy83TTTsuTd3W1v4"
+
+def main():
+    try:
+        client = Client(api_key=API_KEY)
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[{
+                "role": "user",
+                "parts": [{"text": "Say hello in one sentence."}]
+            }]
+        )
+
+        if not response.candidates:
+            print("No candidates returned.")
+            return
+
+        reply = response.candidates[0].content.parts[0].text
+        print("Gemini response:")
+        print(reply)
+
+    except Exception as e:
+        import traceback
+        print("Error occurred:")
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    main()

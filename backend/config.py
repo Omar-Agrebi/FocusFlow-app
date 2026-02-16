@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     BREVO_API_KEY: str
     FROM_EMAIL: str
     FROM_NAME: str
+    GEMINI_API_KEY: str
 
     class Config:
         # Go one directory up to find .env
